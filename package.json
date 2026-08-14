@@ -3,12 +3,12 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "version": "0.9.37",
-  "publisher": "Jager",
+  "publisher": "foorgange",
   "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/deepseek-ai/deepseek-harness.git"
+    "url": "https://github.com/foorgange/DeepSeek-Harness-for-VS-Code.git"
   },
   "engines": {
     "vscode": "^1.90.0"

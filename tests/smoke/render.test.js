@@ -112,6 +112,25 @@ async function main() {
   await wait(50);
   check("列表模式处理 sessions 消息", (document.querySelectorAll(".list-item").length ?? 0) > 0);
 
+  // 流式渲染:chunk 节流 + streaming 光标类生命周期
+  dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [], current: "s1", events: [], approvals: [], questions: [], running: true, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
+  await wait(50);
+  dispatch("delta", { sessionId: "s1", events: [
+    { event: { type: "turn/start", seq: 1, time: 1, data: { turn: 1 } } },
+    { event: { type: "assistant/chunk", seq: 2, time: 2, data: { turn: 1, step: 0, chunk: { type: "block-start", index: 0, blockType: "text" } } } },
+    { event: { type: "assistant/chunk", seq: 3, time: 3, data: { turn: 1, step: 0, chunk: { type: "text-delta", text: "你好" } } } },
+    { event: { type: "assistant/chunk", seq: 4, time: 4, data: { turn: 1, step: 0, chunk: { type: "text-delta", text: "世界" } } } },
+  ] });
+  await wait(200); // 等待节流渲染
+  check("流式文本渲染(你好世界)", (document.querySelector(".msg-assistant")?.textContent ?? "").includes("你好世界"));
+  check("流式期间有 streaming 类", document.querySelectorAll(".streaming").length >= 1);
+  dispatch("delta", { sessionId: "s1", events: [
+    { event: { type: "assistant/message", seq: 5, time: 5, data: { turn: 1, step: 0, message: { content: [{ type: "text", text: "你好世界" }] } } } },
+  ] });
+  await wait(100);
+  check("assistant/message 后 streaming 类移除", document.querySelectorAll(".streaming").length === 0);
+  check("最终文本完整", (document.querySelector(".msg-assistant")?.textContent ?? "").includes("你好世界"));
+
   let fail = 0;
   for (const [name, ok] of checks) {
     console.log((ok ? "OK  " : "FAIL") + " " + name);

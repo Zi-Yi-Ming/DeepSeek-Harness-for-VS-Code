@@ -2,7 +2,7 @@
   "name": "dsh-vscode",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.9.48",
+  "version": "0.9.49",
   "publisher": "Jager",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -70,6 +70,11 @@
         "command": "dsh.openInBrowser",
         "title": "%cmd.openInBrowser.title%",
         "icon": "$(globe)"
+      },
+      {
+        "command": "dsh.generateCommitMessage",
+        "title": "%cmd.generateCommitMessage.title%",
+        "icon": "$(sparkle)"
       },
       {
         "command": "dsh.askSelection",
@@ -143,6 +148,13 @@
         {
           "command": "dsh.openChatWindow",
           "when": "view == dsh.chatView || view == dsh.chatViewSecondary",
+          "group": "navigation@3"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "dsh.generateCommitMessage",
+          "when": "scmProvider == git",
           "group": "navigation@3"
         }
       ],

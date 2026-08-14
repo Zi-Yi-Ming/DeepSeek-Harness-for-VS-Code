@@ -10,6 +10,7 @@
   "cmd.startServer.title": "DSH: 启动服务器",
   "cmd.stopServer.title": "DSH: 停止服务器",
   "cmd.openInBrowser.title": "DSH: 在浏览器中打开",
+  "cmd.generateCommitMessage.title": "DSH: 生成提交信息",
   "cmd.askSelection.title": "DSH: 发送选中代码到 @dsh",
   "cmd.askFile.title": "DSH: 向 @dsh 询问此文件",
   "cmd.showInfo.title": "DSH: 显示诊断信息",

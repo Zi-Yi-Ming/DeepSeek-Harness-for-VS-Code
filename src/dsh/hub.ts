@@ -215,22 +215,31 @@ export class DshHub {
     this.store.notifySessionsChanged();
   }
 
+  /** 已回填过历史的会话(实时流事件进 store 后,不再用 events 数量误判"已有历史")。 */
+  private readonly historyLoaded = new Set<string>();
+
   /** 打开会话并回填历史。 */
   async openSession(sessionId: string) {
     this.store.selectSession(sessionId);
     await this.ensureHistory(sessionId);
   }
 
-  /** 回填会话历史(仅当本地为空;幂等,无副作用,锁定标签页打开旧会话时调用)。 */
+  /**
+   * 回填会话历史:每个会话首次打开时拉一次(sessionHistory 与实时流事件按 seq 合并,只填缺口)。
+   * 不能用 eventsFor().length 判断——mux 全局流会把其它入口(如 Web 端)会话的实时 chunk
+   * 事件写进 store,若因此跳过加载,聊天区只剩过滤后的零星事件(表现为"看不到历史")。
+   */
   async ensureHistory(sessionId: string) {
-    if (this.store.eventsFor(sessionId).length === 0) {
-      try {
-        const { events, hasMore } = await this.client.sessionHistory({ sessionId, maxMessages: HISTORY_PAGE_MESSAGES });
-        this.store.mergeHistory(sessionId, events.map((e) => ({ event: e.event, view: e.view })));
-        this.store.historyHasMore.set(sessionId, hasMore);
-      } catch (error) {
-        console.error("[dsh] history load failed:", error);
-      }
+    if (this.historyLoaded.has(sessionId)) return;
+    this.historyLoaded.add(sessionId);
+    try {
+      const { events, hasMore } = await this.client.sessionHistory({ sessionId, maxMessages: HISTORY_PAGE_MESSAGES });
+      this.store.mergeHistory(sessionId, events.map((e) => ({ event: e.event, view: e.view })));
+      this.store.historyHasMore.set(sessionId, hasMore);
+    } catch (error) {
+      // 失败允许下次重试
+      this.historyLoaded.delete(sessionId);
+      console.error("[dsh] history load failed:", error);
     }
   }
 
@@ -240,7 +249,7 @@ export class DshHub {
     const beforeSeq = this.store.historyBeforeSeq(sessionId);
     if (beforeSeq === undefined) {
       await this.ensureHistory(sessionId);
-      return { hasMore: false };
+      return { hasMore: this.store.historyHasMore.get(sessionId) ?? false };
     }
     this.store.setHistoryLoading(sessionId, true);
     try {

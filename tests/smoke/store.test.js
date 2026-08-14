@@ -76,6 +76,18 @@ store.on("todos", () => nullCount++);
 store.applyTodos("s6", null);
 check("null 相同不重复 emit(但 undefined→null 视为变化)", true); // 仅验证不抛错
 
+// 历史合并:先有实时事件(如 mux 全局流推入的 chunk),再合并历史,缺口被填满且不重复
+const realtime = [10, 11, 12, 13, 14].map((seq) => ({ event: { type: "assistant/chunk", seq, data: { chunk: { type: "text-delta", text: "x" } } } }));
+store.mergeHistory("h1", realtime);
+const history = [8, 9, 10, 11, 12, 13, 14, 15, 16].map((seq) => ({ event: { type: seq % 2 === 0 ? "user/message" : "assistant/message", seq, data: { content: [{ type: "text", text: "m" + seq }] } } }));
+store.mergeHistory("h1", history);
+const merged = store.eventsFor("h1");
+check("历史+实时合并后事件数=9(无重复)", merged.length === 9);
+check("合并后缺口被填(seq 8,9 存在)", merged.some((e) => e.event.seq === 8) && merged.some((e) => e.event.seq === 9));
+check("实时事件未被历史覆盖(seq 10 仍是 chunk)", merged.find((e) => e.event.seq === 10)?.event.type === "assistant/chunk");
+const before = store.historyBeforeSeq("h1");
+check("beforeSeq=最老 seq", before === 8);
+
 try { fs.unlinkSync(out); } catch {}
-console.log("\n结果:", fail === 0 ? "全部通过 (" + 13 + " 项)" : fail + " 项失败");
+console.log("\n结果:", fail === 0 ? "全部通过 (" + 17 + " 项)" : fail + " 项失败");
 process.exit(fail === 0 ? 0 : 1);

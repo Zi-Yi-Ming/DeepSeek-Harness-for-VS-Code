@@ -2,7 +2,7 @@
   "name": "dsh-vscode",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "publisher": "Jager",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -97,7 +97,7 @@
         {
           "id": "dsh",
           "title": "%container.title%",
-          "icon": "media/icon.png",
+          "icon": "media/icon.svg",
           "when": "!dsh:supportsSecondarySidebar"
         }
       ],
@@ -105,7 +105,7 @@
         {
           "id": "dsh-secondary",
           "title": "%container.title%",
-          "icon": "media/icon.png",
+          "icon": "media/icon.svg",
           "when": "dsh:supportsSecondarySidebar"
         }
       ]
@@ -116,7 +116,7 @@
           "id": "dsh.chatView",
           "type": "webview",
           "name": "%view.chat.name%",
-          "icon": "media/icon.png"
+          "icon": "media/icon.svg"
         }
       ],
       "dsh-secondary": [
@@ -124,7 +124,7 @@
           "id": "dsh.chatViewSecondary",
           "type": "webview",
           "name": "%view.chat.name%",
-          "icon": "media/icon.png"
+          "icon": "media/icon.svg"
         }
       ]
     },

@@ -267,6 +267,16 @@ export class DshHub {
     return this.client.listWorkspaces();
   }
 
+  /**
+   * 在当前 VS Code 文件夹下创建会话:先采纳该目录为工作区(幂等,
+   * 以前打开过则进入已有分组,从未打开过则自动建立新分组),再创建会话。
+   * 避免服务器回退到"上次会话目录"导致新对话进错工作区。
+   */
+  async createSessionForFolder(cwd?: string, agentPreset?: string): Promise<string> {
+    if (cwd) await this.adoptWorkspace(cwd);
+    return this.createSession(cwd, agentPreset);
+  }
+
   async createSession(cwd?: string, agentPreset?: string): Promise<string> {
     const { sessionId } = await this.client.createSession({ ...(cwd ? { cwd } : {}), ...(agentPreset ? { agentPreset } : {}) });
     await this.refreshSessions();

@@ -7,7 +7,7 @@
 > - 工作区自动同步:VS Code 打开的文件夹自动成为 DSH 工作区,无需手动指定
 > - 侧边栏图标:DeepSeek 官方鲸鱼 logo(纯黑/淡色主题自适应 SVG)
 > - 界面去 emoji:所有 UI 图标改为纯黑/淡色线条 SVG,文案与文档不含 emoji
-> - 对话标签页:每个会话在编辑器区以标签页打开(顶部标签栏与代码文件随意切换),侧边栏改为会话列表(PR #5)
+> - 对话标签页:每个会话在编辑器区以标签页打开(顶部标签栏与代码文件随意切换),侧边栏改为带搜索框的会话列表(PR #5)
 >
 > 安装本修改版:直接下载 [Releases](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases) 中的 `.vsix` 文件
 > (VS Code → 扩展 → 右上角 … → 从 VSIX 安装)。

@@ -131,6 +131,28 @@ async function main() {
   check("assistant/message 后 streaming 类移除", document.querySelectorAll(".streaming").length === 0);
   check("最终文本完整", (document.querySelector(".msg-assistant")?.textContent ?? "").includes("你好世界"));
 
+  // 权限切换:change → permission 消息 → 乐观更新 → 投影校准
+  const PERMS = { options: [{ value: "read-only", name: "read-only" }, { value: "workspace-write", name: "workspace-write" }, { value: "danger-full-access", name: "danger-full-access" }], currentValue: "read-only" };
+  dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: PERMS, stats: undefined, todos: [], hasMore: false, queue: [] });
+  await wait(80);
+  let permSel = null;
+  for (const s of document.querySelectorAll("select.tool-select")) {
+    if ((s.closest(".tool-item")?.getAttribute("title") ?? "").includes("权限")) { permSel = s; break; }
+  }
+  check("权限选择器存在", !!permSel);
+  if (permSel) {
+    check("权限初始显示 read-only", permSel.value === "read-only");
+    permSel.value = "workspace-write";
+    permSel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    await wait(30);
+    const permMsg = posted.find((p) => p.kind === "permission");
+    check("权限 change 发出 permission 消息", !!permMsg && permMsg.preset === "workspace-write");
+    check("权限乐观更新显示新值", permSel.value === "workspace-write");
+    dispatch("permissions", { sessionId: "s1", value: { ...PERMS, currentValue: "workspace-write" } });
+    await wait(50);
+    check("权限投影校准后保持新值", permSel.value === "workspace-write");
+  }
+
   let fail = 0;
   for (const [name, ok] of checks) {
     console.log((ok ? "OK  " : "FAIL") + " " + name);

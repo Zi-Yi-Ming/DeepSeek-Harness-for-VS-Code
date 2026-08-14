@@ -34,6 +34,11 @@ const MAX_REASONING_CHARS = 4000;
 const MAX_ARGS_CHARS = 1200;
 const MAX_RESULT_CHARS = 2000;
 
+/** 去除文本中的 emoji(与聊天面板一致,保持全界面无 emoji)。 */
+function clean(text: string): string {
+  return text.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{2712}\u{2714}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{23E9}-\u{23FA}\u{2139}\u{2B06}\u{2B07}\u{25B6}\u{25C0}]/gu, "");
+}
+
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
   return text.slice(0, max) + `\n…(已截断,共 ${text.length} 字符)`;
@@ -97,7 +102,7 @@ class StreamFollower {
       if (approval.sessionId !== this.sessionId) return;
       this.flushAll();
       const reason = approval.reason ? `\n\n> ${truncate(approval.reason, 300)}` : "";
-      this.stream.markdown(`**等待审批:调用工具 \`${approval.toolName}\`**${reason}`);
+      this.stream.markdown(`**等待审批:调用工具 \`${clean(approval.toolName)}\`**${reason}`);
       this.addButton("允许", "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "allowed-once" });
       this.addButton("拒绝", "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "rejected" });
     };
@@ -201,7 +206,7 @@ class StreamFollower {
           this.curBlock = "text";
         }
         if (typeof chunk.text === "string") {
-          this.textBuf += chunk.text;
+          this.textBuf += clean(chunk.text);
           this.scheduleFlush();
         }
         break;
@@ -210,7 +215,7 @@ class StreamFollower {
           this.flushCurrentBlock(true);
           this.curBlock = "reasoning";
         }
-        if (typeof chunk.text === "string") this.reasoningBuf += chunk.text;
+        if (typeof chunk.text === "string") this.reasoningBuf += clean(chunk.text);
         break;
       default:
         break;
@@ -242,13 +247,13 @@ class StreamFollower {
         this.flushAll();
         const name: string = event.data?.name ?? "unknown";
         const args = prettyArgs(event.data?.arguments ?? "");
-        this.stream.markdown(`**调用工具 \`${name}\`**\n\n\`\`\`json\n${truncate(args, MAX_ARGS_CHARS)}\n\`\`\``);
+        this.stream.markdown(`**调用工具 \`${clean(name)}\`**\n\n\`\`\`json\n${truncate(args, MAX_ARGS_CHARS)}\n\`\`\``);
         break;
       }
       case "tool/result": {
         this.flushAll();
         const text = extractToolResultText(event.data);
-        if (text) this.stream.markdown(`**工具结果**\n\n\`\`\`\n${truncate(text, MAX_RESULT_CHARS)}\n\`\`\``);
+        if (text) this.stream.markdown(`**工具结果**\n\n\`\`\`\n${clean(truncate(text, MAX_RESULT_CHARS))}\n\`\`\``);
         break;
       }
       case "step/start": {

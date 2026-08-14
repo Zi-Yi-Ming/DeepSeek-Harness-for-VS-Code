@@ -189,16 +189,22 @@ let turnStatusTimer: number | null = null;
 
 const app = document.getElementById("app")!;
 
+/** 去除文本中的 emoji(个人审美:任何来源的文本都不显示 emoji;保留 →、↪、✓ 等排版符号)。 */
+const EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{2712}\u{2714}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{23E9}-\u{23FA}\u{2139}\u{2B06}\u{2B07}\u{25B6}\u{25C0}]/gu;
+function clean(text: string): string {
+  return text.replace(EMOJI_RE, "");
+}
+
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
-  if (text !== undefined) node.textContent = text;
+  if (text !== undefined) node.textContent = clean(text);
   return node;
 }
 
 function markdownHtml(text: string): string {
   try {
-    const raw = marked.parse(text, { async: false, breaks: true }) as string;
+    const raw = marked.parse(clean(text), { async: false, breaks: true }) as string;
     return DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
   } catch {
     return "";
@@ -463,7 +469,7 @@ function t(zh: string, params?: Record<string, string | number>): string {
       text = text.split(`{${k}}`).join(String(v));
     }
   }
-  return text;
+  return clean(text);
 }
 
 // ---------- 页面骨架 ----------
@@ -516,10 +522,10 @@ root.append(dialogOverlay);
 /** 显示对话框;input=true 时返回输入内容(空串视为取消),否则确认返回 "yes"、第二确认返回 "alt"、取消返回 null。 */
 function showDialog(opts: { title: string; text: string; input?: boolean; confirmLabel?: string; confirm2Label?: string; value?: string }): Promise<string | null> {
   return new Promise((resolve) => {
-    dialogTitle.textContent = opts.title;
-    dialogText.textContent = opts.text;
-    dialogConfirm.textContent = opts.confirmLabel ?? "确定";
-    dialogConfirm2.textContent = opts.confirm2Label ?? "清除";
+    dialogTitle.textContent = clean(opts.title);
+    dialogText.textContent = clean(opts.text);
+    dialogConfirm.textContent = clean(opts.confirmLabel ?? "确定");
+    dialogConfirm2.textContent = clean(opts.confirm2Label ?? "清除");
     dialogConfirm2.hidden = !opts.confirm2Label || !!opts.input;
     dialogInput.value = opts.value ?? "";
     dialogInput.hidden = !opts.input;
@@ -1074,7 +1080,7 @@ function findToolNode(callId: string): NodeState | undefined {
 function updateToolSummary(node: NodeState) {
   if (!node.el) return;
   const span = node.el.querySelector(".tool-name");
-  if (span) span.textContent = node.name ?? "tool";
+  if (span) span.textContent = clean(node.name ?? "tool");
 }
 
 // ---------- 消息操作条(复制 / ↪分支回退 / 点赞 / 点踩 / 产物) ----------
@@ -1289,7 +1295,7 @@ function handleEvent(wire: WireEvent) {
       const suffix = suffixParts.join(" · ");
       assistant.roleSuffix = suffix;
       if (assistant.roleEl) {
-        assistant.roleEl.textContent = suffix ? `${modelName} · ${suffix}` : modelName;
+        assistant.roleEl.textContent = clean(suffix ? `${modelName} · ${suffix}` : modelName);
       }
       // 注意:操作条(复制/分支/点赞)不在中间步骤渲染 —— 回合结束(turn/end)时才显示,
       // 避免"回合已经结束"的错觉(与网页版一致)。
@@ -1313,7 +1319,7 @@ function handleEvent(wire: WireEvent) {
         existing.args = data?.arguments ?? existing.args;
         if (existing.el) {
           const pre = existing.el.querySelectorAll(".tool-pre")[0];
-          if (pre) pre.textContent = existing.args ?? "";
+          if (pre) pre.textContent = clean(existing.args ?? "");
           updateToolSummary(existing);
         }
         break;
@@ -1425,7 +1431,7 @@ function collapseToolGroup() {
     .join(" · ");
   const textEl = group.querySelector(".tool-group-summary-text");
   if (textEl) {
-    textEl.textContent = t("本轮调用 {n} 个工具", { n: String(nodes.length) }) + (names ? ` · ${names}` : "");
+    textEl.textContent = clean(t("本轮调用 {n} 个工具", { n: String(nodes.length) }) + (names ? ` · ${names}` : ""));
   }
 }
 
@@ -1902,7 +1908,7 @@ function renderStatsLine() {
       parts.push(`输入 ${fmtTokens(input)} tok · 输出 ${fmtTokens(tu.outputTokens ?? 0)} tok`);
     }
   }
-  statsLine.textContent = parts.join(" | ");
+  statsLine.textContent = clean(parts.join(" | "));
   statsLine.hidden = parts.length === 0;
 }
 
@@ -1998,7 +2004,7 @@ function fmtClock(ms: number): string {
 }
 
 function tickTurnStatus() {
-  turnStatusText.textContent = `${t(turnStatusActivity)} · ${fmtClock(Date.now() - turnStatusStartedAt)}`;
+  turnStatusText.textContent = clean(`${t(turnStatusActivity)} · ${fmtClock(Date.now() - turnStatusStartedAt)}`);
 }
 
 function startTurnStatus(time: number) {
@@ -2033,12 +2039,12 @@ function updateSendButton() {
     btnSendStop.append(lineIcon(ICONS.stop, 15));
     btnSendStop.className = "btn-icon-btn send-btn stop-active";
     btnSendStop.title = t("停止回复");
-    hint.textContent = t("运行中 · 停止");
+    hint.textContent = clean(t("运行中 · 停止"));
   } else {
     btnSendStop.append(lineIcon(ICONS.send, 16));
     btnSendStop.className = "btn-icon-btn send-btn";
     btnSendStop.title = state.running ? t("发送(运行中,消息将排队)") : t("发送(Enter)");
-    hint.textContent = state.running ? "运行中 · 消息将排队发送" : t("Enter 发送 · Shift+Enter 换行");
+    hint.textContent = clean(state.running ? "运行中 · 消息将排队发送" : t("Enter 发送 · Shift+Enter 换行"));
   }
   btnSendStop.disabled = !state.current;
 }
@@ -2047,16 +2053,16 @@ function updateStatus(status: HubStatus) {
   state.status = status;
   if (status.serverUp && status.muxConnected) {
     statusDot.className = "status-dot ok";
-    statusText.textContent = status.model ? `已连接 · ${status.model}` : "已连接";
+    statusText.textContent = clean(status.model ? `已连接 · ${status.model}` : "已连接");
   } else if (status.serverStarting) {
     statusDot.className = "status-dot starting";
-    statusText.textContent = "启动中…";
+    statusText.textContent = clean("启动中…");
   } else if (status.serverUp) {
     statusDot.className = "status-dot starting";
-    statusText.textContent = "连接中…";
+    statusText.textContent = clean("连接中…");
   } else {
     statusDot.className = "status-dot err";
-    statusText.textContent = "未连接 · 点击重试";
+    statusText.textContent = clean("未连接 · 点击重试");
     statusDot.onclick = () => vscode.postMessage({ kind: "startServer" });
     return;
   }
@@ -2388,7 +2394,7 @@ function handleMessage(msg: any) {
       const modelName = state.models?.current?.model ?? "DeepSeek";
       for (const n of state.nodes) {
         if (n.kind === "assistant" && n.roleEl) {
-          n.roleEl.textContent = n.roleSuffix ? `${modelName} · ${n.roleSuffix}` : modelName;
+          n.roleEl.textContent = clean(n.roleSuffix ? `${modelName} · ${n.roleSuffix}` : modelName);
         }
       }
       break;

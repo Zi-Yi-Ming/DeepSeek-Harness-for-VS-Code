@@ -88,6 +88,7 @@ export class ChatWindowProvider {
 
   private titleFor(sessionId: string): string {
     const s = this.hub.store.sessions.get(sessionId);
-    return s?.title || sessionId.slice(0, 16);
+    const title = (s?.title ?? "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{2712}\u{2714}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{23E9}-\u{23FA}\u{2139}\u{2B06}\u{2B07}\u{25B6}\u{25C0}]/gu, "");
+    return title || sessionId.slice(0, 16);
   }
 }

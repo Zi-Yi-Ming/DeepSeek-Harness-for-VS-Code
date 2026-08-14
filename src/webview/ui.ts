@@ -247,53 +247,39 @@ const ICONS = {
   stop: "M6 6h12v12H6z",
 
   // 编辑(铅笔)
-  edit: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
   // 归档(箱子)
-  archive: "M21 8v13H3V8|M1 3h22v5H1z|M10 12h4",
   // 计划/审批(剪贴板)
-  plan: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2|M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z",
   // 目标(靶心)
-  target: "M12 21a9 9 0 1 1 9-9 9 9 0 0 1-9 9z|M12 15.5a3.5 3.5 0 1 1 3.5-3.5 3.5 3.5 0 0 1-3.5 3.5z|M12 12h.01",
   // 完成(对勾)
-  check: "M20 6 9 17l-5-5",
   // 删除(垃圾桶)
-  trash: "M3 6h18|M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6|M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2|M10 11v6|M14 11v6",
   // 警告(三角)
-  warn: "M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z|M12 9v4|M12 17h.01",
   // 信息
-  info: "M12 22a10 10 0 1 1 10-10 10 10 0 0 1-10 10z|M12 16v-4|M12 8h.01",
   // 附件(回形针)
-  attach: "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48",
   // 向上箭头
-  upArrow: "M12 19V5|M5 12l7-7 7 7",
   // 文件
-  file: "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z|M13 2v7h7",
   // 文件夹
-  folder: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z",
   // 暂停
-  pause: "M6 4h4v16H6z|M14 4h4v16h-4z",
   // 播放
-  play: "M5 3l14 9-14 9z",
   // 刷新
-  refresh: "M23 4v6h-6|M20.49 15a9 9 0 1 1-2.12-9.36L23 10",
   // 压缩
-  compact: "M8 3v3a2 2 0 0 1-2 2H3|M21 8h-3a2 2 0 0 1-2-2V3|M3 16h3a2 2 0 0 1 2 2v3|M16 21v-3a2 2 0 0 1 2-2h3",
   // 对话(气泡)
-  chat: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
   // 网格(插件/技能列表)
-  grid: "M3 3h7v7H3z|M14 3h7v7h-7z|M3 14h7v7H3z|M14 14h7v7h-7z",
   // 闪电
-  zap: "M13 2 3 14h9l-1 8 10-12h-9l1-8z",
   // 学位帽(技能)
-  cap: "M22 10 12 5 2 10l10 5 10-5z|M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5",
   // 机器人(智能体)
-  bot: "M12 2a2 2 0 0 1 2 2v1h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z|M9 12h.01|M15 12h.01|M9 15h6",
   // 锁
-  lock: "M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z|M7 11V7a5 5 0 0 1 10 0v4",
   // 搜索(放大镜)
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z|M21 21l-4.35-4.35",
   // 分组折叠箭头
   chevron: "M6 9l6 6 6-6",
+  // 任务清单(与 Web 端 todo 面板一致)
+  checklist: "M4 6.5h12.5|M4 12h12.5|M4 17.5h8|M14.5 16l2 2 4-4.5",
+  // 任务完成(圆 + 对勾)
+  todoCheck: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z|M8.4 12.2l2.4 2.4 4.8-5.2",
+  // 任务进行中(圆弧)
+  todoProgress: "M12 3.2a8.8 8.8 0 1 1-7.9 4.9",
+  // 任务待处理(虚线圆,虚线由 CSS stroke-dasharray 提供)
+  todoPending: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
 };
 
 /** 创建简约线条 SVG 图标;paths 用 | 分隔多个 path d。 */
@@ -333,6 +319,7 @@ function permissionLabel(value: string, fallback?: string): string {
 const EN_TEXT: Record<string, string> = {
   "向 DeepSeek Harness 发送消息…": "Message DeepSeek Harness…",
   "Enter 发送 · Shift+Enter 换行": "Enter to send · Shift+Enter for newline",
+  "运行中 · Enter 排队 / Ctrl+Enter 插话": "Running · Enter to queue / Ctrl+Enter to steer",
   "运行中 · 消息将排队发送": "Running · message will be queued",
   "运行中 · 停止": "Running · Stop",
   "新建会话": "New session",
@@ -340,6 +327,9 @@ const EN_TEXT: Record<string, string> = {
   "在浏览器中打开": "Open in browser",
   "— 选择会话 —": "— Select session —",
   "思考深度(推理强度)": "Thinking depth (reasoning effort)",
+  "思考": "Thinking",
+  "预设": "Preset",
+  "权限": "Permission",
   "模型": "Model",
   "Agent 预设": "Agent preset",
   "读写权限(沙箱模式 + 审批策略)": "Read/write permission (sandbox + approval policy)",
@@ -448,6 +438,10 @@ const EN_TEXT: Record<string, string> = {
   "等待推进": "awaiting progression",
   "第 {n} 轮": "round {n}",
   "任务 · {a} 进行中 · {b} 待处理": "Tasks · {a} in progress · {b} pending",
+  "任务": "To-dos",
+  "{done} 已完成": "{done} completed",
+  "{active} 进行中": "{active} in progress",
+  "{pending} 待处理": "{pending} pending",
   "插件(Cordis)": "Plugins (Cordis)",
   "列出插件状态": "List plugin status",
   "运行插件 <id>": "Run plugin <id>",
@@ -469,6 +463,16 @@ const EN_TEXT: Record<string, string> = {
   "未分组会话": "Ungrouped",
   "插话发送": "Send as steer",
   "仅运行中可插话发送": "Steer is only available while running",
+  "{a} 轮 · {b} 步": "{a} turns · {b} steps",
+  "LLM {a} · 工具 {b}": "LLM {a} · tools {b}",
+  "首 token 平均 {a}s": "avg first token {a}s",
+  "缓存命中 {a}%": "cache hit {a}%",
+  "输入 {a} tok · 输出 {b} tok": "in {a} tok · out {b} tok",
+  "文件夹": "folder",
+  "文件": "file",
+  "移除附件": "Remove attachment",
+  "已连接 · {model}": "Connected · {model}",
+  "等待审批:{tool}": "Awaiting approval: {tool}",
 };
 
 function t(zh: string, params?: Record<string, string | number>): string {
@@ -588,13 +592,14 @@ const composer = el("div", "composer");
 // 附件行:左上角 + 添加文件按钮 + 附件芯片(自动附加激活文件 / 手动选择)
 const attachmentsRow = el("div", "attachments-row");
 
-function toolSelect(label: string, title: string): { wrap: HTMLElement; select: HTMLSelectElement } {
+function toolSelect(label: string, title: string): { wrap: HTMLElement; select: HTMLSelectElement; labelEl: HTMLElement } {
   const wrap = el("label", "tool-item");
   wrap.title = title;
-  wrap.append(el("span", "tool-label", label));
+  const labelEl = el("span", "tool-label", label);
+  wrap.append(labelEl);
   const select = el("select", "tool-select");
   wrap.append(select);
-  return { wrap, select };
+  return { wrap, select, labelEl };
 }
 
 // 思考 / 模型 / 预设:位于输入框右下角
@@ -649,6 +654,25 @@ composerBottom.append(btnPlus, btnAddAttach, permissionTool.wrap, composerRight,
 const composerTop = el("div", "composer-top");
 composerTop.append(attachmentsRow, presetTool.wrap);
 composer.append(composerTop, inputWrap, composerBottom);
+
+/** init 后按当前语言刷新模块级静态文案(模块加载时 state.lang 还是默认值 zh-cn)。 */
+function applyStaticTexts() {
+  btnNew.title = t("新建会话");
+  btnMore.title = t("会话操作:分叉 / 重命名 / 归档");
+  thinkingTool.labelEl.textContent = t("思考");
+  thinkingTool.wrap.title = t("思考深度(推理强度)");
+  modelTool.labelEl.textContent = t("模型");
+  modelTool.wrap.title = t("模型");
+  presetTool.labelEl.textContent = t("预设");
+  presetTool.wrap.title = t("Agent 预设");
+  permissionTool.labelEl.textContent = t("权限");
+  permissionTool.wrap.title = t("读写权限(沙箱模式 + 审批策略)");
+  input.placeholder = t("向 DeepSeek Harness 发送消息…");
+  btnBackToMain.title = t("回到主线(父会话)");
+  btnPlus.title = t("输入命令(/plan、/compact、.claude 命令…)");
+  btnAddAttach.title = t("添加文件或文件夹到对话");
+  hint.textContent = clean(t("Enter 发送 · Shift+Enter 换行"));
+}
 
 // 添加文件/文件夹选择菜单(挂在 composer 内)
 const attachMenu = el("div", "plus-menu attach-menu");
@@ -976,7 +1000,7 @@ function renderNode(node: NodeState): HTMLElement {
       for (const block of node.blocks ?? []) {
         if (block.type === "reasoning") {
           const details = el("details", "block-reasoning-details");
-          details.append(el("summary", "block-reasoning-summary", "思考过程"));
+          details.append(el("summary", "block-reasoning-summary", t("思考过程")));
           const body = el("div", "block-body");
           setHtml(body, block.text);
           block.el = body;
@@ -1002,11 +1026,11 @@ function renderNode(node: NodeState): HTMLElement {
       const nameSpan = el("span", "tool-name", node.name ?? "tool");
       summary.append(nameSpan);
       const body = el("div", "tool-body");
-      const argsLabel = el("div", "tool-label", "参数");
+      const argsLabel = el("div", "tool-label", t("参数"));
       const argsPre = el("pre", "tool-pre", node.args ?? "");
       body.append(argsLabel, argsPre);
       if (node.result !== undefined) {
-        body.append(el("div", "tool-label", "结果"), el("pre", "tool-pre", node.result));
+        body.append(el("div", "tool-label", t("结果")), el("pre", "tool-pre", node.result));
       }
       wrap.append(summary, body);
       return wrap;
@@ -1869,6 +1893,37 @@ function renderContextBar() {
 // ---------- 会话统计行(上下文条上方) ----------
 
 /** 待办事项面板(Codex 风格:任务进度摘要 + 清单)。 */
+/** 待办事项面板(Web 端风格:任务标题 + 计数摘要 + 展开清单)。 */
+function applyQueueItems(items: any[]) {
+  // 差集清理:已从队列移除的项(如插话后转正、被移除)删除对应节点
+  const alive = new Set(items.map((i: any) => i.id));
+  for (const [id, node] of state.queuedIds) {
+    if (!alive.has(id)) {
+      state.queuedIds.delete(id);
+      removeNode(node);
+    }
+  }
+  for (const item of items) {
+    if (item.placement !== "queued") continue;
+    const id: string = item.id;
+    if (state.queuedIds.has(id)) continue;
+    const text = extractText(item.message?.content);
+    const split = splitAttachmentContext(text);
+    if (split.attachContext) {
+      appendNode({ kind: "attach", key: `qat:${id}`, el: null, text: split.attachContext });
+    }
+    const node: NodeState = {
+      kind: "queued",
+      key: `q:${id}`,
+      el: null,
+      queueItemId: id,
+      text: isSlashCommandOnly(split.userText) ? `⌘ ${split.userText.trim()}` : split.userText,
+    };
+    state.queuedIds.set(id, node);
+    appendNode(node);
+  }
+}
+
 function renderTodos() {
   todoPanel.innerHTML = "";
   const list = state.todos;
@@ -1877,15 +1932,34 @@ function renderTodos() {
     return;
   }
   todoPanel.hidden = false;
-  const inProgress = list.filter((t) => t.status === "in_progress").length;
-  const pending = list.filter((t) => t.status === "pending").length;
+  // 摘要与 Web 端一致:按状态计数,非零段才显示,· 连接(任务 1 进行中 · 2 待处理)
+  const done = list.filter((t) => t.status === "completed").length;
+  const active = list.filter((t) => t.status === "in_progress").length;
+  const pending = list.length - done - active;
+  const parts: string[] = [];
+  if (done > 0) parts.push(t("{done} 已完成", { done: String(done) }));
+  if (active > 0) parts.push(t("{active} 进行中", { active: String(active) }));
+  if (pending > 0) parts.push(t("{pending} 待处理", { pending: String(pending) }));
   const summary = el("summary", "todo-panel-summary");
-  summary.append(lineIcon(ICONS.box, 12), el("span", undefined, t("任务 · {a} 进行中 · {b} 待处理", { a: String(inProgress), b: String(pending) })));
+  summary.append(lineIcon(ICONS.checklist, 13));
+  summary.append(el("span", "todo-panel-title", t("任务")));
+  summary.append(el("span", "todo-panel-progress", parts.join(" · ")));
+  const chev = el("span", "todo-panel-chevron");
+  chev.append(lineIcon(ICONS.chevron, 12));
+  summary.append(chev);
   todoPanel.append(summary);
   const body = el("div", "todo-panel-body");
   for (const item of list) {
-    const row = el("div", "todo-row" + (item.status === "completed" ? " done" : item.status === "in_progress" ? " active" : ""));
-    row.append(el("span", "todo-status", item.status === "completed" ? "✓" : item.status === "in_progress" ? "●" : "○"));
+    const row = el("div", "todo-row" + (item.status === "completed" ? " done" : item.status === "in_progress" ? " active" : " pending"));
+    const glyph = el("span", "todo-status");
+    glyph.append(
+      item.status === "completed"
+        ? lineIcon(ICONS.todoCheck, 13)
+        : item.status === "in_progress"
+          ? lineIcon(ICONS.todoProgress, 13)
+          : lineIcon(ICONS.todoPending, 13),
+    );
+    row.append(glyph);
     row.append(el("span", "todo-content", item.content));
     body.append(row);
   }
@@ -1916,9 +1990,9 @@ function renderStatsLine() {
   const tu = state.stats?.tokenUsage;
   const parts: string[] = [];
   if (st) {
-    if (typeof st.turns === "number") parts.push(`${st.turns} 轮 · ${st.steps ?? 0} 步`);
-    if (typeof st.llmMs === "number") parts.push(`LLM ${fmtDuration(st.llmMs)} · 工具 ${fmtDuration(st.toolMs ?? 0)}`);
-    if (typeof st.ttftMs === "number" && st.ttftSteps > 0) parts.push(`首 token 平均 ${(st.ttftMs / st.ttftSteps / 1000).toFixed(1)}s`);
+    if (typeof st.turns === "number") parts.push(t("{a} 轮 · {b} 步", { a: String(st.turns), b: String(st.steps ?? 0) }));
+    if (typeof st.llmMs === "number") parts.push(t("LLM {a} · 工具 {b}", { a: fmtDuration(st.llmMs), b: fmtDuration(st.toolMs ?? 0) }));
+    if (typeof st.ttftMs === "number" && st.ttftSteps > 0) parts.push(t("首 token 平均 {a}s", { a: (st.ttftMs / st.ttftSteps / 1000).toFixed(1) }));
     if (typeof st.decodeMs === "number" && st.decodeMs > 0 && typeof st.decodeTokens === "number") {
       parts.push(`${Math.round(st.decodeTokens / (st.decodeMs / 1000))} tok/s`);
     }
@@ -1928,8 +2002,8 @@ function renderStatsLine() {
     const cached = tu.cacheReadTokens ?? 0;
     const input = uncached + cached;
     if (input > 0) {
-      if (cached > 0) parts.push(`缓存命中 ${Math.round((cached / input) * 100)}%`);
-      parts.push(`输入 ${fmtTokens(input)} tok · 输出 ${fmtTokens(tu.outputTokens ?? 0)} tok`);
+      if (cached > 0) parts.push(t("缓存命中 {a}%", { a: String(Math.round((cached / input) * 100)) }));
+      parts.push(t("输入 {a} tok · 输出 {b} tok", { a: fmtTokens(input), b: fmtTokens(tu.outputTokens ?? 0) }));
     }
   }
   statsLine.textContent = parts.length > 0 ? clean(parts.join(" | ")) : t("暂无统计");
@@ -1944,11 +2018,11 @@ function renderAttachments() {
   const list = state.attachments;
   for (const a of list) {
     const chip = el("span", "attachment-chip" + (a.auto ? " auto" : ""));
-    chip.title = `${a.kind === "folder" ? "文件夹" : "文件"}: ${a.path}`;
+    chip.title = `${a.kind === "folder" ? t("文件夹") : t("文件")}: ${a.path}`;
     chip.append(lineIcon(a.kind === "folder" ? ICONS.box : ICONS.copy, 12));
-    chip.append(el("span", "attachment-label", (a.auto ? "激活文件 · " : "") + a.label));
+    chip.append(el("span", "attachment-label", (a.auto ? t("激活文件 · ") : "") + a.label));
     const close = el("button", "chip-close", "×");
-    close.title = "移除附件";
+    close.title = t("移除附件");
     chip.append(close);
     close.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -2083,16 +2157,16 @@ function updateStatus(status: HubStatus) {
   state.status = status;
   if (status.serverUp && status.muxConnected) {
     statusDot.className = "status-dot ok";
-    statusText.textContent = clean(status.model ? `已连接 · ${status.model}` : "已连接");
+    statusText.textContent = clean(status.model ? t("已连接 · {model}", { model: status.model }) : t("已连接"));
   } else if (status.serverStarting) {
     statusDot.className = "status-dot starting";
-    statusText.textContent = clean("启动中…");
+    statusText.textContent = clean(t("启动中…"));
   } else if (status.serverUp) {
     statusDot.className = "status-dot starting";
-    statusText.textContent = clean("连接中…");
+    statusText.textContent = clean(t("连接中…"));
   } else {
     statusDot.className = "status-dot err";
-    statusText.textContent = clean("未连接 · 点击重试");
+    statusText.textContent = clean(t("未连接 · 点击重试"));
     statusDot.onclick = () => vscode.postMessage({ kind: "startServer" });
     return;
   }
@@ -2118,11 +2192,11 @@ function renderPending() {
   pendingArea.innerHTML = "";
   for (const approval of state.approvals.values()) {
     const card = el("div", "pending-card pending-approval");
-    card.append(el("div", "pending-title", `等待审批:${approval.toolName}`));
+    card.append(el("div", "pending-title", t("等待审批:{tool}", { tool: approval.toolName })));
     if (approval.reason) card.append(el("div", "pending-detail", approval.reason));
     const row = el("div", "pending-actions");
-    const allow = el("button", "btn btn-allow", "允许");
-    const reject = el("button", "btn btn-reject", "拒绝");
+    const allow = el("button", "btn btn-allow", t("允许"));
+    const reject = el("button", "btn btn-reject", t("拒绝"));
     allow.addEventListener("click", () => {
       vscode.postMessage({ kind: "respond", approvalId: approval.approvalId, outcome: "allowed-once" });
       state.approvals.delete(approval.approvalId);
@@ -2283,6 +2357,10 @@ function parseRecommendedLabel(label: string): { base: string; recommended: bool
 // ---------- 消息处理 ----------
 
 function handleMessage(msg: any) {
+  // 列表模式只关心会话列表相关消息;聊天渲染类消息直接忽略(列表布局没有消息区,渲染到游离树纯属浪费)
+  if (state.mode === "list" && msg.kind !== "init") {
+    if (!["sessions", "workspaces", "running", "status", "lang", "openTab", "newTab"].includes(msg.kind)) return;
+  }
   switch (msg.kind) {
     case "init": {
       stopTurnStatus();
@@ -2290,8 +2368,11 @@ function handleMessage(msg: any) {
       state.current = msg.current ?? null;
       state.mode = msg.mode === "list" ? "list" : "chat";
       state.locked = !!msg.locked;
+      state.lang = msg.lang ?? "zh-cn";
       applyLayout();
       refreshList();
+      // 语言就绪后刷新模块级静态文案(英文界面不再停留在中文)
+      applyStaticTexts();
       state.running = msg.running ?? false;
       state.status = msg.status ?? state.status;
       state.nodes = [];
@@ -2307,7 +2388,6 @@ function handleMessage(msg: any) {
       state.permissions = msg.permissions;
       state.stats = msg.stats;
       state.todos = msg.todos;
-      state.lang = msg.lang ?? "zh-cn";
       state.models = null;
       state.presets = null;
       state.turnStarts = [];
@@ -2321,6 +2401,8 @@ function handleMessage(msg: any) {
       renderLoadMoreButton();
       for (const approval of msg.approvals ?? []) state.approvals.set(approval.approvalId, approval);
       for (const question of msg.questions ?? []) state.questions.set(question.frameRpcId, question);
+      // 恢复排队消息(重连/切会话时队列可能非空)
+      applyQueueItems(msg.queue ?? []);
       renderSessions();
       renderPending();
       renderGoal();
@@ -2386,16 +2468,14 @@ function handleMessage(msg: any) {
       break;
     }
     case "subagentPreview": {
-      const anchor = document.querySelector(`.subagent-chip[title^="子代理 ${msg.childId?.slice(0, 12) ?? ""}"]`);
       const pop = el("div", "msg-popover");
-      pop.append(el("div", "plus-menu-label", "子代理最近回复"));
-      pop.append(el("div", "subagent-preview", msg.preview ?? "(暂无)"));
-      pop.append(el("div", "plus-menu-label", "完整历史请到 DSH 网页版查看"));
+      pop.append(el("div", "plus-menu-label", t("子代理最近回复")));
+      pop.append(el("div", "subagent-preview", msg.preview ?? t("(暂无)")));
+      pop.append(el("div", "plus-menu-label", t("完整历史请到 DSH 网页版查看")));
       conversationBottom.append(pop);
       pop.addEventListener("click", (e) => e.stopPropagation());
       const close = () => pop.remove();
       setTimeout(() => document.addEventListener("click", close, { once: true }), 0);
-      void anchor;
       break;
     }
     case "delta": {
@@ -2493,39 +2573,18 @@ function handleMessage(msg: any) {
       break;
     }
     case "queue": {
-      const items = msg.items ?? [];
-      // 差集清理:已从队列移除的项(如插话后转正、被移除)删除对应节点
-      const alive = new Set(items.map((i: any) => i.id));
-      for (const [id, node] of state.queuedIds) {
-        if (!alive.has(id)) {
-          state.queuedIds.delete(id);
-          removeNode(node);
-        }
-      }
-      for (const item of items) {
-        if (item.placement !== "queued") continue;
-        const id: string = item.id;
-        if (state.queuedIds.has(id)) continue;
-        const text = extractText(item.message?.content);
-        const split = splitAttachmentContext(text);
-        if (split.attachContext) {
-          appendNode({ kind: "attach", key: `qat:${id}`, el: null, text: split.attachContext });
-        }
-        const node: NodeState = {
-          kind: "queued",
-          key: `q:${id}`,
-          el: null,
-          queueItemId: id,
-          text: isSlashCommandOnly(split.userText) ? `⌘ ${split.userText.trim()}` : split.userText,
-        };
-        state.queuedIds.set(id, node);
-        appendNode(node);
-      }
+      applyQueueItems(msg.items ?? []);
       break;
     }
     case "historyMore": {
       const events = msg.events ?? [];
       state.seqs = new Set();
+      state.turnStarts = [];
+      state.stepStarts = new Map();
+      state.currentStreamTurn = undefined;
+      state.streamedBlockKeys = new Set();
+      state.turnToolGroup = null;
+      state.queuedIds = new Map();
       messages.innerHTML = "";
       state.nodes = [];
       for (const wire of events) handleEvent(wire);

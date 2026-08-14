@@ -103,12 +103,12 @@ class StreamFollower {
       this.flushAll();
       const reason = approval.reason ? `\n\n> ${truncate(approval.reason, 300)}` : "";
       this.stream.markdown(`**等待审批:调用工具 \`${clean(approval.toolName)}\`**${reason}`);
-      this.addButton("允许", "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "allowed-once" });
-      this.addButton("拒绝", "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "rejected" });
+      this.addButton(t("允许"), "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "allowed-once" });
+      this.addButton(t("拒绝"), "dsh.respond", { sessionId: this.sessionId, approvalId: approval.approvalId, outcome: "rejected" });
     };
     const onApprovalResolved = (approvalId: string, outcome: string) => {
-      if (outcome === "allowed-once") this.stream.markdown("已允许");
-      else this.stream.markdown("已拒绝");
+      if (outcome === "allowed-once") this.stream.markdown(t("已允许"));
+      else this.stream.markdown(t("已拒绝"));
     };
     const onQuestion = (q: { sessionId: string; frameRpcId: string; questions: { id: string; question: string; detail?: string; options?: { label: string; description?: string }[]; multiSelect?: boolean }[] }) => {
       if (q.sessionId !== this.sessionId) return;
@@ -121,7 +121,7 @@ class StreamFollower {
       this.stream.markdown(parts.join("\n\n"));
       for (const item of q.questions) {
         if (item.multiSelect) {
-          this.stream.markdown("*(多选提问请到 DSH 聊天面板中回答)*");
+          this.stream.markdown(t("*(多选提问请到 DSH 聊天面板中回答)*"));
           continue;
         }
         for (const option of item.options ?? []) {
@@ -133,7 +133,7 @@ class StreamFollower {
         }
       }
       if (q.questions.every((item) => !item.options?.length)) {
-        this.stream.markdown("*(该提问无可选项,请到 DSH 聊天面板中回答)*");
+        this.stream.markdown(t("*(该提问无可选项,请到 DSH 聊天面板中回答)*"));
       }
     };
     this.unsubs.push(
@@ -395,7 +395,7 @@ export function registerChatParticipant(hub: DshHub, ctx: vscode.ExtensionContex
     ): { prompt: string; label?: string; commandId?: string; title?: string }[] {
       return [
         { prompt: t("followup.continue"), label: t("followup.continue") },
-        { commandId: "dsh.new", title: t("followup.newSession"), prompt: "/new" },
+        { commandId: "dsh.newChat", title: t("followup.newSession"), prompt: "/new" },
       ];
     },
   };
@@ -405,9 +405,9 @@ export function registerChatParticipant(hub: DshHub, ctx: vscode.ExtensionContex
   const registerCommand = (chat as any).registerChatCommand?.bind(chat);
   if (typeof registerCommand === "function") {
     try {
-      disposables.push(registerCommand("dsh", "new", () => ({ title: "新建会话" })));
-      disposables.push(registerCommand("dsh", "session", () => ({ title: "切换到指定会话" })));
-      disposables.push(registerCommand("dsh", "preset", () => ({ title: "设置下一个会话的预设" })));
+      disposables.push(registerCommand("dsh", "new", () => ({ title: t("新建会话") })));
+      disposables.push(registerCommand("dsh", "session", () => ({ title: t("切换到指定会话") })));
+      disposables.push(registerCommand("dsh", "preset", () => ({ title: t("设置下一个会话的预设") })));
     } catch {
       // 旧版本不支持斜杠命令时静默降级
     }

@@ -669,7 +669,7 @@ input.addEventListener("input", () => {
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
     e.preventDefault();
-    sendCurrent();
+    sendCurrent(e.ctrlKey ? "steer" : "queue");
   }
 });
 btnSendStop.addEventListener("click", () => {
@@ -678,7 +678,7 @@ btnSendStop.addEventListener("click", () => {
     vscode.postMessage({ kind: "stop" });
     return;
   }
-  sendCurrent();
+  sendCurrent("queue");
 });
 btnAddAttach.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -2050,7 +2050,7 @@ function updateSendButton() {
     btnSendStop.append(lineIcon(ICONS.send, 16));
     btnSendStop.className = "btn-icon-btn send-btn";
     btnSendStop.title = state.running ? t("发送(运行中,消息将排队)") : t("发送(Enter)");
-    hint.textContent = clean(state.running ? "运行中 · 消息将排队发送" : t("Enter 发送 · Shift+Enter 换行"));
+    hint.textContent = clean(state.running ? t("运行中 · Enter 排队 / Ctrl+Enter 插话") : t("Enter 发送 · Shift+Enter 换行"));
   }
   btnSendStop.disabled = !state.current;
 }
@@ -2521,7 +2521,7 @@ function handleMessage(msg: any) {
   }
 }
 
-function sendCurrent() {
+function sendCurrent(mode: "queue" | "steer" = "queue") {
   const text = input.value.trim();
   if (!text) return;
   if (!state.current) {
@@ -2530,6 +2530,7 @@ function sendCurrent() {
   }
   vscode.postMessage({
     kind: "send",
+    mode,
     text,
     attachments: state.attachments.map(({ kind, path }) => ({ kind, path })),
   });

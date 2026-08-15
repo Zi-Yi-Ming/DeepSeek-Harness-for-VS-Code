@@ -1,5 +1,9 @@
 # DeepSeek Harness for VS Code (dsh-vscode)
 
+<img width="3071" height="1919" alt="屏幕截图 2026-08-14 175802" src="https://github.com/user-attachments/assets/e9881be7-332c-4591-9590-26e487802e5e" />
+<img width="3066" height="1919" alt="屏幕截图 2026-08-14 180205" src="https://github.com/user-attachments/assets/ab613456-637e-4dd6-b23c-ba4d0f49324a" />
+
+
 > **个人修改版(fork:foorgange)**
 > 本仓库是 [NEXTINDIE/DeepSeek-Harness-for-VS-Code](https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code) 的个人 fork 修改版,
 > 在原版基础上包含个人改动,其中**部分改动未提交 PR**(仅存在于本仓库):

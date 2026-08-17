@@ -31,5 +31,6 @@
   "config.language": "UI language of the extension (chat panel, notifications, @dsh replies).",
   "config.language.auto": "Follow the VS Code display language (default)",
   "config.language.zh": "Chinese (Simplified)",
-  "config.language.en": "English"
+  "config.language.en": "English",
+  "config.installRollbackPlugin": "Auto-install the turn-level Git rollback plugin into the DSH web profile (enables /rollback, /redo, /checkpoints)"
 }

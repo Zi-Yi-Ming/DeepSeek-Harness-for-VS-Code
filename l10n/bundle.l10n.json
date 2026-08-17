@@ -103,5 +103,21 @@
   "*(该提问无可选项,请到 DSH 聊天面板中回答)*": "*(no options available; answer in the DSH chat panel)*",
   "新建会话": "New session",
   "切换到指定会话": "Switch to the specified session",
-  "设置下一个会话的预设": "Set preset for the next session"
+  "设置下一个会话的预设": "Set preset for the next session",
+  "rollback.confirmMessage": "Restore the workspace to the state before turn {turn}? Uncommitted changes made after that point will be reverted (a safety snapshot is taken first).",
+  "rollback.confirmYes": "Rollback",
+  "rollback.done": "Workspace restored to the state before turn {turn}",
+  "rollback.noRecord": "No turn-level rollback snapshots for this session (requires the DSH server-side plugin)",
+  "rollback.noUndoable": "No undoable snapshot for that turn (requires a turn-end snapshot; use /rollback N for a whole-workspace rollback)",
+  "rollback.noCheckpoint": "No rollback checkpoint for turn {turn}",
+  "rollback.noGit": "Not a Git repository: {cwd}",
+  "rollback.snapshotFailed": "Cannot take a safety snapshot, rollback aborted: {error}",
+  "rollback.restoreFailed": "Rollback failed; the workspace was restored to its previous state: {error}",
+  "rollback.compareFailed": "Compare failed: {error}",
+  "rollback.pluginInstalledHint": "The turn-level Git rollback plugin is installed for the DSH web profile, but the running server has not loaded it yet. Restart the DSH server to activate /rollback, /redo and /checkpoints.",
+  "rollback.pluginRestartNow": "Restart Now",
+  "rollback.pluginRestarted": "DSH server restarted; the rollback plugin is active now.",
+  "rollback.pluginManualRestart": "The DSH server was not started by this extension. Restart it from the terminal that launched it.",
+  "msg.rollbackRestartHint": "The turn-level Git rollback plugin was installed, but the running DSH server has not loaded it. Restart the server to activate /rollback, /redo and /checkpoints.",
+  "msg.rollbackRestartAction": "Restart Server"
 }

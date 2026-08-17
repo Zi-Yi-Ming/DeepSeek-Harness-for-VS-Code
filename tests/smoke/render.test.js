@@ -153,6 +153,35 @@ async function main() {
     check("权限投影校准后保持新值", permSel.value === "workspace-write");
   }
 
+  // 回合检查点分隔线 + 回退确认卡片
+  dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
+  await wait(50);
+  dispatch("rollbackCheckpointsData", { requestId: "init", sessionId: "s1", head: "abc", dirty: 0, checkpoints: [{ turn: 1, time: 1, commit: "c1", files: [], addedTotal: 0, deletedTotal: 0, truncated: false, hasAfter: true }] });
+  await wait(50);
+  dispatch("delta", { sessionId: "s1", events: [
+    { event: { type: "turn/start", seq: 10, time: 10, data: { turn: 1 } } },
+    { event: { type: "assistant/chunk", seq: 11, time: 11, data: { turn: 1, step: 0, chunk: { type: "block-start", index: 0, blockType: "text" } } } },
+    { event: { type: "assistant/chunk", seq: 12, time: 12, data: { turn: 1, step: 0, chunk: { type: "text-delta", text: "回复" } } } },
+  ] });
+  await wait(150);
+  check("渲染回合分隔线", document.querySelectorAll(".rb-divider").length >= 1);
+  check("分隔线带还原按钮", document.querySelectorAll(".rb-divider-btn").length >= 1);
+  posted = [];
+  document.querySelector(".rb-divider-btn")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await wait(30);
+  const rp = posted.find((p) => p.kind === "rollbackPreview");
+  check("点击还原发 rollbackPreview", !!rp && rp.turn === 1);
+  check("确认卡片出现(加载中)", !!document.querySelector(".rb-review-card"));
+  dispatch("rollbackPreviewData", { requestId: rp?.requestId, sessionId: "s1", preview: { turn: 1, time: 1, commit: "c1", files: [{ path: "src/a.ts", added: 3, deleted: 1 }], addedTotal: 3, deletedTotal: 1, removedUntracked: [], untrackedUnknown: false, truncated: false } });
+  await wait(50);
+  check("预览显示文件行", !!document.querySelector(".rb-file-row"));
+  check("预览有确认按钮", !!document.querySelector(".rb-confirm"));
+  posted = [];
+  document.querySelector(".rb-confirm")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await wait(30);
+  const cmd = posted.find((p) => p.kind === "command");
+  check("确认回退发 /rollback 命令", !!cmd && cmd.line === "/rollback 1");
+
   let fail = 0;
   for (const [name, ok] of checks) {
     console.log((ok ? "OK  " : "FAIL") + " " + name);

@@ -6,209 +6,96 @@
 
 > **个人修改版(fork:foorgange)**
 > 本仓库是 [NEXTINDIE/DeepSeek-Harness-for-VS-Code](https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code) 的个人 fork 修改版,
-> 在原版基础上包含个人改动,其中**部分改动未提交 PR**(仅存在于本仓库):
+> 在原版基础上深度定制,包含大量个人改动(部分改动曾以 PR 回馈上游,PR #3~#6)。
+>
+> **特性清单**:
 >
 > - 工作区自动同步:VS Code 打开的文件夹自动成为 DSH 工作区,无需手动指定
 > - 侧边栏图标:DeepSeek 官方鲸鱼 logo(纯黑/淡色主题自适应 SVG)
 > - 界面去 emoji:所有 UI 图标改为纯黑/淡色线条 SVG,文案与文档不含 emoji(含运行时过滤,服务端数据也滤)
-> - 对话标签页:每个会话在编辑器区以标签页打开(顶部标签栏与代码文件随意切换),侧边栏为带搜索框、按工作区分组的会话列表(可展开/收起)(PR #5)
-> - 会话统计实时常驻:轮数/步数/耗时/tok·s/缓存命中/输入输出 token 常驻显示并实时刷新;长会话历史同步修复(Web 端聊过的会话在插件端打开即可见完整历史,v0.9.44)
-> - 任务进度面板:输入框上方常驻「任务」摘要条(已完成/进行中/待处理分段计数),展开显示完整任务清单,已完成带对勾、进行中圆弧、待处理虚线圆,与 Web 端一致且实时同步(v0.9.43)
-> - 插话发送:任务运行中 Ctrl+Enter 立即打断当前回合插入新指令(与 Web 端一致),Enter 排队;排队消息带图形化「插话发送」按钮(仅运行中可用),点击即插话该条排队消息(v0.9.42)
-> - 权限/模型/推理等级与 Web 端双向同步:插件端切换经宿主命令通道执行,Web 端即时可见(v0.9.47)
-> - 工作区对话双向同步:新建会话自动挂入工作区,历史会话打开时自动补挂,Web 端工作区里可见全部对话(v0.9.48)
-> - SCM 提交信息生成:源代码管理面板一键让 DSH 生成提交信息(v0.9.49,移植自官方上游)
-> - 新建对话自动归属当前 VS Code 目录(工作区→打开文件目录→用户主目录兜底),也可弹出选择器指定工作区(已有工作区列表或浏览目录)
-> - 对话内容限宽居中、界面布局按个人审美优化;输入框 760px、消息区 1200px;对话动效与流畅度优化(流式渲染节流+闪烁光标+消息动画,尊重系统减少动态效果设置)(v0.9.46)
+> - 对话标签页:每个会话在编辑器区以标签页打开,侧边栏为带搜索框、按工作区分组的会话列表(可展开/收起)
+> - 会话统计实时常驻:轮数/步数/耗时/tok·s/缓存命中/输入输出 token 常驻显示并实时刷新
+> - 任务进度面板:输入框上方常驻「任务」摘要条,展开显示完整任务清单,与 Web 端一致且实时同步
+> - 插话发送:Ctrl+Enter(Cmd+Enter)立即打断当前回合插入新指令,排队消息带「插话发送」按钮
+> - 回合级 Git 回退:回合分隔线带「还原检查点」,回退前代码审核预览(diff 逐文件展开),/undo /redo /checkpoints
+> - 与 Web 端完全双向同步:对话历史、权限预设、模型与推理等级、工作区及其中的会话
+> - SCM 提交信息生成:源代码管理面板一键让 DSH 生成提交信息
+> - 对话动效与流畅度优化:流式渲染节流 + 闪烁光标 + 消息动画(尊重系统减少动态效果设置)
+> - 新建对话自动归属当前 VS Code 目录(工作区→打开文件目录→用户主目录兜底),可弹出选择器指定工作区
+> - 对话内容限宽居中(输入框 760px、消息区 1200px)
 >
 > 安装本修改版:直接下载 [Releases](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases) 中的 `.vsix` 文件
 > (VS Code → 扩展 → 右上角 … → 从 VSIX 安装)。
 >
-> 以下为原版 README 内容。
+> 本 README 即为个人版说明(不再保留原版 README 内容)。
 
-[English version](#english) | 发布者:Jager · 最新版本:0.9.0
-
-在 VS Code 中直接使用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`),与 ChatGPT / Copilot 一样出现在 VS Code 聊天体系中,支持**中英文双语界面**。
+---
 
 ## 功能总览
 
-- **内置聊天参与者 `@dsh`**:VS Code 原生 Chat 面板(Ctrl+Alt+I)输入 `@` 选择 `dsh`;助手回复流式渲染,含工具调用与审批按钮;支持 `/new`、`/session <ID>`、`/preset <名>` 斜杠命令。
-- **辅助侧栏子 tab**:VS Code ≥ 1.106 时容器直接出现在辅助侧栏(与 ChatGPT 等并列);旧版本自动回退到活动栏图标。
-- **独立聊天窗口**:编辑器区 WebviewPanel,命令 `DSH: 打开独立聊天窗口`。
-- **现代聊天界面**:大号圆角输入框、胶囊工具栏(思考深度 / 模型 / 预设 / 权限)、会话统计行(轮数 · 步骤 · LLM/工具耗时 · 首 token · tok/s · 缓存命中 · 输入/输出 token)、上下文用量进度条。
-- **消息操作条**(每条回答下方,简约线条图标):复制(双层矩形图标)/ 分支(分叉线条图标,点击展开菜单:逆时针箭头"回退到此处" · 分叉图标"从此处新建分支" · 左上折线"分支并回退到更早位置" · 左上箭头"回到主线")/ 点赞、点踩(拇指线条图标,官方 `/feedback` 记录)/ 消息头显示模型名 · 思考耗时 · 本步 token 消耗。
-- **思考过程折叠**:思考过程默认收起,点击展开;工具调用每轮折叠为一行摘要"本轮调用 N 个工具"。
-- **产物文件框**:每轮结束在对话末尾显示生成的文件列表,点击在编辑器中打开。
-- **会话管理**:会话下拉旁的 ⋯ 菜单支持 分叉 / 重命名(预填当前标题)/ 归档(仍保留在服务器)。
-- **目标(goal)**:goal 进度卡(目标 · 阶段 · 轮次 · 进度条)+ 目标模式芯片,点击可 修改 / 完成 / 清除目标。
-- **计划模式**:/ 命令菜单选"计划模式"后出现 计划 芯片,点击退出;`plan/mode` 状态实时同步。
-- **附件**:自动附加当前激活文件(跟随编辑器切换,蓝色芯片)+ 手动添加文件/文件夹(二选一菜单);发送时上下文注入模型,界面默认折叠为"附件上下文"卡片,不展开文件内容。
-- **子代理**:对话底部显示子代理芯片(运行状态),点击查看最近回复。
-- **技能**:/ 菜单列出会话可用技能(官方 skill.list),点击插入提示词。
-- **.claude / .codex / GitHub Copilot 目录**:CLAUDE.md / AGENTS.md 由 DSH 核心自动读取(菜单显示已读取状态);.claude/commands 与 .claude/skills、.codex/skills(SKILL.md)、.github/copilot-instructions.md、.github/instructions、.github/agents、.github/prompts 均可在 / 菜单中查看并插入使用。
-- **读写权限**:权限胶囊切换只读 / 工作区可写 / 完全访问(危险),官方 `/permission` 命令。
-- **跨项目会话**:每项目(工作区文件夹)独立 @dsh 会话;多根工作区跟随活动编辑器;`/session <ID>` 显式切换;`dsh.participantSessionMode: global` 可全局共用。
-- **多语言**:扩展与聊天界面跟随 VS Code 显示语言(简体中文 / English)。
+在 VS Code 中直接使用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`),支持**中英文双语界面**。
+
+### 界面与交互
+
+- **对话标签页**:每个会话在编辑器区以独立标签页打开,可与代码文件随意切换;侧边栏为会话列表(搜索框 + 按工作区分组 + 展开/收起),运行中会话有高亮圆点
+- **独立聊天窗口**:`DSH: 打开独立聊天窗口` 命令,以及侧边栏子 tab 视图
+- **现代聊天界面**:大号圆角输入框、胶囊工具栏(思考深度 / 模型 / 预设 / 权限)、消息区限宽居中(1200px)、输入框 760px
+- **动效**:消息淡入、流式闪烁光标、按钮过渡,全部尊重 `prefers-reduced-motion`
+- **纯线条图标**:无 emoji,黑白 SVG 自动适配明暗主题
+
+### 对话能力
+
+- **实时会话统计**:轮数 · 步骤 · LLM/工具耗时 · 首 token · tok/s · 缓存命中 · 输入/输出 token,常驻显示每 5 秒刷新
+- **任务进度面板**:「任务 N 进行中 · M 待处理」摘要条 + 展开清单(完成=对勾/进行中=圆弧/待处理=虚线圆),与 Web 端同步
+- **插话发送**:运行中 Ctrl+Enter(Cmd+Enter)立即打断当前回合;Enter 排队;排队消息带「插话发送」按钮
+- **回合级 Git 回退**(服务端 dsh-git-rollback 插件自动安装):回合分隔线带「还原检查点」,点击后先展示代码审核预览(逐文件增删行数 + 可展开 diff + 将删除的未跟踪文件提示),确认后回退;支持 `/undo` `/redo` `/checkpoints` 斜杠命令
+- **审批/提问卡片**:工具调用审批、多选提问、计划模式确认
+- **排队消息实时同步**:队列状态即时转发,插话/移除即时生效
+
+### 与 Web 端双向同步
+
+- 对话历史:Web 端聊过的会话在插件端打开即可见完整历史(自动回填 + 「加载更早」分页)
+- 权限预设、模型、推理等级:任一端切换,另一端即时可见
+- 工作区与其中的会话:新建会话自动挂入工作区,Web 端左侧按工作区分组可见
+- 会话统计/任务进度/目标卡片:实时刷新,与 Web 端一致
+
+### 其他
+
+- **SCM 提交信息生成**:源代码管理面板(SCM)标题栏「生成提交信息」按钮,DSH 根据 diff 生成提交信息写入输入框
+- **@dsh 聊天参与者**:VS Code 原生 Chat 面板输入 `@` 选择 `dsh`,支持 `/new`、`/session <ID>`、`/preset <名>` 斜杠命令;跟随提示自动生成
+- **新建对话归属**:自动归入当前 VS Code 目录对应工作区(工作区→打开文件目录→用户主目录兜底),可弹出目录选择器指定
+- **长会话历史修复**:历史回放过滤流式分片,12 万+ 事件会话不卡死
+- **界面 emoji 双层防线**:源码无 emoji + 运行时过滤(服务端数据里的 emoji 也会被滤掉)
+
+## 快捷键
+
+| 操作 | 快捷键 |
+|---|---|
+| 发送消息 | `Enter`(Shift+Enter 换行) |
+| 插话(打断当前回合) | `Ctrl+Enter`(macOS `Cmd+Enter`) |
+| 停止回复 | 输入框右侧按钮 |
 
 ## 安装
 
-### 方式一:安装 .vsix(推荐)
+从 [Releases](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases) 下载最新 `.vsix`:
+VS Code → 扩展 → 右上角 `...` → **从 VSIX 安装**。
 
-```bash
-cd <本目录>
-npm install
-npm run package          # 生成 Releases/dsh-vscode-<版本>.vsix
-```
-
-VS Code 中:扩展 → `…` → 从 VSIX 安装 → 选择 `Releases\` 下的 .vsix → 重载窗口。
-
-### 方式二:开发模式(F5)
-
-```bash
-npm install
-npm run watch
-```
-
-用 VS Code 打开本目录,按 F5 启动扩展开发宿主。
-
-### 前置条件
-
-- VS Code ≥ 1.90;内置聊天 `@dsh` 需要 ≥ 1.95;辅助侧栏容器需要 ≥ 1.106(旧版自动回退活动栏)。
-- DSH CLI(`dsh`),或允许扩展用 `npx --yes @deepseek-ai/dsh@latest` 自动启动服务器。
-- DSH 已配置模型凭证(与 `dsh web` 一致)。
-
-## 使用
-
-| 入口 | 说明 |
-| --- | --- |
-| 内置 Chat `@dsh` | 输入 `@` 选 dsh;`DSH: 打开内置聊天 (@dsh)` 或状态栏 DSH 图标可自动填入 |
-| 辅助侧栏 tab | 视图 → 外观 → Secondary Side Bar(Ctrl+Alt+B) |
-| 独立窗口 | `DSH: 打开独立聊天窗口` |
-
-- 输入框:`Enter` 发送,`Shift+Enter` 换行;运行中发送按钮(纸飞机线条图标)变为停止(方块线条图标),输入文字变回发送(消息排队)。
-- 左下角 `/` 按钮:命令菜单(计划模式 / 压缩上下文 / 设置目标 / 记录反馈 / 切换权限 / 技能 / .claude 命令与技能)—— 点击插入命令到输入框,回车执行。
-- 左上角 `+` 按钮:添加文件 / 添加文件夹(二选一);附件行蓝色芯片为自动附加的激活文件(× 移除)。
-- 消息操作条:点击分叉线条图标打开分支/回退菜单 —— 逆时针箭头"回退到此处"(去掉本条及之后)、分叉图标"从此处新建分支"(保留到此)、左上折线"分支并回退到更早位置";分叉会话另有左上箭头"回到主线"。
-- 会话 ⋯ 菜单:分叉 / 重命名 / 归档;右上角"预设"胶囊(仅新会话显示);右下角"思考 / 模型"胶囊。
-- 模式芯片:计划模式(点击退出)、目标模式(点击管理目标)。
-- 右键菜单:编辑器选中代码 → `DSH: 发送选中代码到 @dsh`;文件右键 → `DSH: 向 @dsh 询问此文件`。
-
-## 配置
-
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `dsh.url` | `http://127.0.0.1:3080` | DSH Web 服务器地址(修改后需重载) |
-| `dsh.autoStart` | `true` | VS Code 启动时若服务器未运行则自动启动 `dsh web` |
-| `dsh.command` | `dsh` | 启动命令;找不到时回退 npx |
-| `dsh.autoStartTimeoutSec` | `60` | 自动启动最长等待秒数 |
-| `dsh.participantSessionMode` | `per-workspace` | @dsh 会话范围:每项目 / 全局 |
-| `dsh.openPanelOnStartup` | `false` | 启动时自动打开独立聊天窗口 |
-| `dsh.defaultReasoningEffort` | `""` | 新会话默认思考深度(off/high/max 等,取决于模型) |
-
-## 故障排查
-
-- **扩展没出现**:确认已重载窗口;扩展面板查看运行时状态有无校验错误;命令面板执行 `DSH: 显示诊断信息`。
-- **视图占位"没有已注册数据提供程序"**:执行 `DSH: 修复聊天视图(重置视图位置)`,或命令面板 `Restart Extension Host`。
-- **Webview 报 Service Worker 错误**:VS Code 1.100.x 平台缺陷,升级 VS Code 或清空 `%APPDATA%\Code\Service Worker\CacheStorage`。
-- **"agent preset is fixed"**:已开始的会话不可切换预设,预设胶囊只在新会话显示。
-- **未连接**:执行 `DSH: 启动服务器`;检查 `dsh.url` 端口。
-- **启动时无法自动启动服务器**:扩展会在 VS Code 启动时自动启动 `dsh web`(失败后每 15 秒重探,服务器上线即自动连接);具体失败原因见输出通道 "DeepSeek Harness" 的 `[server]` 日志。若报错含 `0xC0000142`/`EPERM`,说明 VS Code 是从 DSH 会话或受限终端启动的(子进程创建被拦截)——改用普通方式启动 VS Code,或把该会话权限调为 `danger-full-access`。
+要求:VS Code 1.90+,本机可运行 `dsh`(服务器自动启动,或手动 `dsh web`)。
 
 ## 开发
 
 ```bash
 npm install
-npm run typecheck   # 类型检查
-npm run build       # 构建
-npm run package     # 打包到 Releases/
+npm run typecheck     # 类型检查
+npm run build         # esbuild 构建 dist/
+npm test              # 冒烟测试(store 链路 + 渲染 + 产物/emoji 验证)
 ```
 
-- 宿主代码:`src/extension.ts`、`src/dsh/*`(API 客户端 / 服务器管理 / 会话存储 / Chat Participant / 项目会话映射)。
-- 界面:`src/webview/{channel,panel,window,ui}.ts` + `media/chat.css`;图标 `media/icon.png`。
-- 本地化:`package.nls.json` / `package.nls.zh-cn.json`(贡献点)、`l10n/bundle.l10n.json` / `bundle.l10n.zh-cn.json`(宿主运行时)、`ui.ts` 的 EN_TEXT 词典(Webview)。
-- 集成测试:`tools/test-client.ts`(对运行中的服务器验证全链路)。
+打包:参见维护手册(手工 zip 打包 vsix)。
 
----
+## 相关链接
 
-<a id="english"></a>
-
-# DeepSeek Harness for VS Code (dsh-vscode)
-
-[中文版](#) | Publisher: Jager · Latest: 0.9.0
-
-Use [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) directly in VS Code, alongside ChatGPT / Copilot, with a **bilingual (Chinese / English) UI**.
-
-## Features
-
-- **Built-in chat participant `@dsh`**: type `@` in the native Chat panel (Ctrl+Alt+I); streamed replies with tool calls and approval buttons; slash commands `/new`, `/session <ID>`, `/preset <name>`.
-- **Secondary sidebar tab**: container appears in the Secondary Side Bar on VS Code ≥ 1.106 (falls back to the Activity Bar on older versions).
-- **Standalone chat window**: `DSH: Open Standalone Chat Window`.
-- **Modern chat UI**: large rounded input box, pill toolbar (thinking depth / model / preset / permission), session stats line (turns · steps · LLM/tool time · first token · tok/s · cache hit · in/out tokens), context usage bar.
-- **Per-message actions** (minimal line icons): copy (double-rectangle icon) / branch (forked line icon; menu: counter-clockwise arrow "Rewind here" · forked icon "Branch from here" · up-left fold "Branch and rewind earlier" · up-left arrow "Back to main") / thumbs up/down (line icons, official `/feedback`) / message header shows model · thinking time · per-step tokens.
-- **Collapsible reasoning** (hidden by default) and per-turn tool summary ("Called N tools this turn").
-- **Deliverables box**: files produced each turn listed at the end of the conversation, click to open.
-- **Session management**: ⋯ menu with fork / rename (pre-filled title) / archive.
-- **Goals**: progress card + goal chip with edit / complete / clear.
-- **Plan mode**: plan chip appears after `/plan`, click to exit.
-- **Attachments**: auto-attach the active editor file (follows editor switches) + add file/folder (separate pickers); context is injected into the model but displayed collapsed.
-- **Subagents**: status chips with recent-reply preview.
-- **Skills**: available skills listed in the `/` menu (official skill.list).
-- **.claude / .codex / GitHub Copilot directories**: CLAUDE.md / AGENTS.md auto-loaded by the DSH core; `.claude/commands`, `.claude/skills`, `.codex/skills` (SKILL.md), `.github/copilot-instructions.md`, `.github/instructions`, `.github/agents` and `.github/prompts` are listed in the `/` menu and insertable.
-- **Permissions**: read-only / workspace-write / full-access switch (official `/permission` command).
-- **Cross-project sessions**: per-folder @dsh sessions; multi-root follows the active editor; `dsh.participantSessionMode: global` to share one session.
-- **i18n**: follows the VS Code display language (zh-cn / en).
-
-## Install
-
-```bash
-cd <this folder>
-npm install
-npm run package          # outputs Releases/dsh-vscode-<version>.vsix
-```
-
-VS Code → Extensions → `…` → Install from VSIX → pick the file in `Releases\` → reload.
-
-Prerequisites: VS Code ≥ 1.90 (built-in chat ≥ 1.95; secondary sidebar container ≥ 1.106); DSH CLI or npx fallback; model credentials configured (same as `dsh web`).
-
-## Usage highlights
-
-- Enter to send, Shift+Enter for newline; while running the send button (paper-plane line icon) becomes stop (square line icon), typing turns it back into send (queued send).
-- `/` button (bottom-left): command menu (plan / compact / goal / feedback / permission / skills / .claude) — inserts the command into the input; press Enter to run.
-- `+` button next to it: add file / add folder; the blue chip is the auto-attached active file.
-- Message actions: click the forked-line icon to open the branch/rewind menu — counter-clockwise arrow "Rewind here", forked icon "Branch from here", up-left fold "Branch and rewind earlier"; branch sessions also show the up-left arrow "Back to main".
-- Session ⋯ menu: fork / rename / archive; preset pill at the top-right (new sessions only); thinking / model pills at the bottom-right.
-- Context menus: selection → `DSH: Send Selection to @dsh`; file → `DSH: Ask @dsh About This File`.
-
-## Configuration
-
-| Key | Default | Description |
-| --- | --- | --- |
-| `dsh.url` | `http://127.0.0.1:3080` | DSH web server URL |
-| `dsh.autoStart` | `true` | On VS Code startup, start `dsh web` if the server is not running |
-| `dsh.command` | `dsh` | Start command; falls back to npx |
-| `dsh.autoStartTimeoutSec` | `60` | Auto-start timeout (seconds) |
-| `dsh.participantSessionMode` | `per-workspace` | @dsh session scope: per-project / global |
-| `dsh.openPanelOnStartup` | `false` | Open the standalone window on startup |
-| `dsh.defaultReasoningEffort` | `""` | Default thinking depth for new sessions (off/high/max, model-dependent) |
-
-## Troubleshooting
-
-- Nothing appears → reload the window; run `DSH: Show Diagnostics`; check the extension runtime state for validation errors.
-- "No registered data provider" → run `DSH: Repair Chat View (Reset View Locations)` or `Restart Extension Host`.
-- Service worker error in the webview → VS Code 1.100.x platform bug: update VS Code or clear `%APPDATA%\Code\Service Worker\CacheStorage`.
-- "agent preset is fixed" → started sessions cannot switch presets; the preset pill only shows for new sessions.
-- Not connected → run `DSH: Start Server`; check `dsh.url`.
-
-## Development
-
-```bash
-npm install
-npm run typecheck
-npm run build
-npm run package     # → Releases/
-```
-
-- Host: `src/extension.ts`, `src/dsh/*` (API client, server manager, session store, chat participant, project-session mapping).
-- UI: `src/webview/{channel,panel,window,ui}.ts` + `media/chat.css`; icon `media/icon.png`.
-- i18n: `package.nls.json` / `package.nls.zh-cn.json`, `l10n/bundle.l10n.json` / `bundle.l10n.zh-cn.json`, and the `EN_TEXT` dictionary in `ui.ts`.
-- Integration test: `tools/test-client.ts`.
+- Fork 仓库:https://github.com/foorgange/DeepSeek-Harness-for-VS-Code
+- 上游:https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code
+- DSH 本体:https://github.com/deepseek-ai/deepseek-harness
+- 回馈上游的 PR:#3(工作区同步)、#4(鲸鱼图标)、#5(编辑器标签页+会话列表)、#6(去 emoji)

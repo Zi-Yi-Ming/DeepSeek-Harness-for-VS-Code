@@ -103,5 +103,21 @@
   "*(该提问无可选项,请到 DSH 聊天面板中回答)*": "*(该提问无可选项,请到 DSH 聊天面板中回答)*",
   "新建会话": "新建会话",
   "切换到指定会话": "切换到指定会话",
-  "设置下一个会话的预设": "设置下一个会话的预设"
+  "设置下一个会话的预设": "设置下一个会话的预设",
+  "rollback.confirmMessage": "把工作区恢复到第 {turn} 回合之前的状态?该点之后的未提交改动将被还原(恢复前会先做一次安全快照)。",
+  "rollback.confirmYes": "回退",
+  "rollback.done": "工作区已恢复到第 {turn} 回合之前的状态",
+  "rollback.noRecord": "该会话没有可用的回合级回退快照(需要 DSH 服务端插件)",
+  "rollback.noUndoable": "该回合没有可精确撤销的快照(需要回合结束快照;整体回退可用 /rollback N)",
+  "rollback.noCheckpoint": "没有第 {turn} 回合的回退快照",
+  "rollback.noGit": "不是 Git 仓库:{cwd}",
+  "rollback.snapshotFailed": "无法创建安全快照,已中止回退:{error}",
+  "rollback.restoreFailed": "回退失败,工作区已还原到回退前的状态:{error}",
+  "rollback.compareFailed": "对比失败:{error}",
+  "rollback.pluginInstalledHint": "回合级 Git 回退插件已安装到 DSH web profile,但当前运行的服务器尚未加载。重启 DSH 服务器后 /rollback、/redo、/checkpoints 生效。",
+  "rollback.pluginRestartNow": "立即重启",
+  "rollback.pluginRestarted": "DSH 服务器已重启,回合级回退插件已生效。",
+  "rollback.pluginManualRestart": "当前 DSH 服务器不是由本扩展启动的,请在其启动终端中重启。",
+  "msg.rollbackRestartHint": "回合级 Git 回退插件已安装,但当前运行的 DSH 服务器尚未加载。重启服务器后 /rollback、/redo、/checkpoints 生效。",
+  "msg.rollbackRestartAction": "重启服务器"
 }

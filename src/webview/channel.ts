@@ -5,6 +5,7 @@ import type { DshHub } from "../dsh/hub";
 import { folderCwd } from "../dsh/participantSessions";
 import type { PendingApproval, PendingQuestion, StoredEvent, StoredSession, SessionStore } from "../dsh/sessionStore";
 import type { QueueItem } from "../dsh/types";
+import { checkpointSummaries, loadRollbackRecord, rollbackFileDiff, rollbackPreview } from "../dsh/rollback";
 
 /** 宿主侧文案翻译(跟随 dsh.language 设置,配置变更即时生效)。 */
 const t = createTranslator();
@@ -339,6 +340,51 @@ export class ChatChannel {
             this.post({ kind: "notice", message: t("notice.queueActionFailed", { error: String(error) }), level: "error" });
           }
         }
+        break;
+      }
+      case "rollbackCheckpoints": {
+        // 读取该会话的回合检查点记录(由服务端 dsh-git-rollback 插件写入 .dsh/rollback/)
+        const sid = typeof msg.sessionId === "string" ? msg.sessionId : current;
+        if (!sid) break;
+        const requestId = typeof msg.requestId === "string" ? msg.requestId : "";
+        const session = store.sessions.get(sid);
+        const cwd = session?.cwd ?? folderCwd();
+        const record = cwd ? await loadRollbackRecord(cwd, sid) : undefined;
+        if (record) {
+          const summaries = await checkpointSummaries(cwd!, record);
+          this.post({ kind: "rollbackCheckpointsData", requestId, sessionId: sid, ...summaries });
+        } else {
+          this.post({ kind: "rollbackCheckpointsData", requestId, sessionId: sid, error: t("rollback.noRecord") });
+        }
+        break;
+      }
+      case "rollbackPreview": {
+        // 回退前「代码审核」:工作区相对目标检查点的逐文件差异
+        const sid = typeof msg.sessionId === "string" ? msg.sessionId : current;
+        if (!sid) break;
+        const requestId = typeof msg.requestId === "string" ? msg.requestId : "";
+        const session = store.sessions.get(sid);
+        const cwd = session?.cwd ?? folderCwd();
+        const record = cwd ? await loadRollbackRecord(cwd, sid) : undefined;
+        const turn = typeof msg.turn === "number" ? msg.turn : undefined;
+        const preview = cwd && record ? await rollbackPreview(cwd, record, turn) : undefined;
+        this.post({
+          kind: "rollbackPreviewData",
+          requestId,
+          sessionId: sid,
+          ...(preview ? { preview } : { error: t("rollback.noRecord") }),
+        });
+        break;
+      }
+      case "rollbackDiff": {
+        // 单个文件的完整差异(弹窗内点击展开时按需获取)
+        const sid = typeof msg.sessionId === "string" ? msg.sessionId : current;
+        if (!sid || typeof msg.path !== "string" || typeof msg.commit !== "string") break;
+        const requestId = typeof msg.requestId === "string" ? msg.requestId : "";
+        const session = store.sessions.get(sid);
+        const cwd = session?.cwd ?? folderCwd();
+        const diff = cwd ? await rollbackFileDiff(cwd, msg.commit, msg.path) : undefined;
+        this.post({ kind: "rollbackDiffData", requestId, ...(diff ? { diff } : { error: t("rollback.compareFailed", { error: "" }) }) });
         break;
       }
       case "getActiveFile":

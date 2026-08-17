@@ -2,7 +2,7 @@
   "name": "dsh-vscode",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.9.50",
+  "version": "0.9.51",
   "publisher": "Jager",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -235,6 +235,11 @@
           ],
           "default": "auto",
           "description": "%config.language%"
+        },
+        "dsh.installRollbackPlugin": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.installRollbackPlugin%"
         }
       }
     }

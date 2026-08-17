@@ -84,7 +84,7 @@ interface BlockState {
 }
 
 interface NodeState {
-  kind: "user" | "assistant" | "tool" | "queued" | "note" | "files" | "attach";
+  kind: "user" | "assistant" | "tool" | "queued" | "note" | "files" | "attach" | "rbDivider";
   key: string;
   el: HTMLElement | null;
   blocks?: BlockState[];
@@ -114,6 +114,10 @@ interface NodeState {
   cmd?: boolean;
   /** 排队消息节点对应的队列项 id(插话/移除等操作需要) */
   queueItemId?: string;
+  /** 回合分隔线节点:该回合的检查点 commit(有值才显示「还原检查点」按钮) */
+  rbCommit?: string;
+  /** 工具调用是否失败(tool/result 的 isError) */
+  failed?: boolean;
 }
 
 // ---------- 状态 ----------
@@ -133,6 +137,12 @@ const state = {
   queuedIds: new Map<string, NodeState>(),
   approvals: new Map<string, ApprovalInfo>(),
   questions: new Map<string, QuestionInfo>(),
+  /** 回合级回退:检查点记录(turn → commit/时间),用于渲染「还原检查点」分隔线 */
+  rbCheckpoints: new Map<number, { turn: number; time: number; commit: string; hasAfter: boolean }>(),
+  /** 回退确认弹窗的请求 id(防过期响应) */
+  rbRequestId: 0,
+  /** 回退确认弹窗状态 */
+  rbReview: null as null | { requestId: string; turn: number; el: HTMLElement | null; loading: boolean; error?: string },
   hasMore: false,
   streamKey: null as string | null,
   streamBlock: null as BlockState | null,
@@ -280,6 +290,10 @@ const ICONS = {
   todoProgress: "M12 3.2a8.8 8.8 0 1 1-7.9 4.9",
   // 任务待处理(虚线圆,虚线由 CSS stroke-dasharray 提供)
   todoPending: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
+  // 回退撤销(弯箭头)
+  undo: "M3 7v6h6|M3 13a9 9 0 1 0 3-5.7L3 10",
+  // 失败(叉号)
+  xmark: "M18 6 6 18|M6 6l12 12",
 };
 
 /** 创建简约线条 SVG 图标;paths 用 | 分隔多个 path d。 */
@@ -473,6 +487,15 @@ const EN_TEXT: Record<string, string> = {
   "移除附件": "Remove attachment",
   "已连接 · {model}": "Connected · {model}",
   "等待审批:{tool}": "Awaiting approval: {tool}",
+  "回合 {turn}": "Turn {turn}",
+  "还原检查点": "Restore checkpoint",
+  "回退到本回合开始前的工作区状态": "Restore the workspace to the state before this turn",
+  "回退预览": "Rollback preview",
+  "回退将删除 {n} 个未跟踪文件": "Rollback will remove {n} untracked file(s)",
+  "无文件改动": "No file changes",
+  "确认回退": "Confirm rollback",
+  "正在计算…": "Calculating…",
+  "加载中…": "Loading…",
 };
 
 function t(zh: string, params?: Record<string, string | number>): string {
@@ -993,6 +1016,21 @@ function renderNode(node: NodeState): HTMLElement {
       }
       return wrap;
     }
+    case "rbDivider": {
+      // 回合分隔线:显示回合号 + 「还原检查点」按钮(回合级 Git 回退)
+      const wrap = el("div", "rb-divider");
+      const label = el("span", "rb-divider-label", t("回合 {turn}", { turn: String(node.turn ?? 0) }));
+      wrap.append(label);
+      if (node.rbCommit) {
+        const btn = el("button", "btn rb-divider-btn");
+        btn.type = "button";
+        btn.append(lineIcon(ICONS.undo, 12), el("span", undefined, t("还原检查点")));
+        btn.title = t("回退到本回合开始前的工作区状态");
+        btn.addEventListener("click", () => requestRollbackReview(node.turn ?? 0));
+        wrap.append(btn);
+      }
+      return wrap;
+    }
     case "assistant": {
       const wrap = el("div", "msg msg-assistant");
       const role = el("div", "msg-role", state.models?.current?.model ?? "DeepSeek");
@@ -1022,9 +1060,17 @@ function renderNode(node: NodeState): HTMLElement {
       return wrap;
     }
     case "tool": {
-      const wrap = el("details", "msg tool-card");
+      // 工具卡片:名称 + 状态指示(运行/完成/失败,线条图标) + 参数 + 结果
+      const wrap = el("details", "msg tool-card" + (node.done ? (node.failed ? " tool-failed" : " tool-done") : " tool-running"));
       const summary = el("summary", "tool-summary");
-      const nameSpan = el("span", "tool-name", node.name ?? "tool");
+      const nameSpan = el("span", "tool-name");
+      const statusEl = el("span", "tool-status-icon");
+      statusEl.append(
+        node.done
+          ? lineIcon(node.failed ? ICONS.xmark : ICONS.todoCheck, 12)
+          : el("span", "tool-status-dot"),
+      );
+      nameSpan.append(statusEl, el("span", "tool-name-text", node.name ?? "tool"));
       summary.append(nameSpan);
       const body = el("div", "tool-body");
       const argsLabel = el("div", "tool-label", t("参数"));
@@ -1427,8 +1473,19 @@ function handleEvent(wire: WireEvent) {
       const existing = findToolNode(callId);
       if (existing) {
         existing.result = truncateResult(text);
+        // 与网页端一致:content[0].isError 才是失败标志(顶层 isError 仅兜底)
+        const isError = data?.message?.isError === true || data?.isError === true || data?.message?.content?.[0]?.isError === true;
+        existing.failed = isError;
         existing.done = true;
         if (existing.el) {
+          existing.el.classList.remove("tool-running");
+          existing.el.classList.add(existing.failed ? "tool-failed" : "tool-done");
+          // 状态图标更新
+          const iconEl = existing.el.querySelector(".tool-status-icon");
+          if (iconEl) {
+            iconEl.innerHTML = "";
+            iconEl.append(lineIcon(existing.failed ? ICONS.xmark : ICONS.todoCheck, 12));
+          }
           const pres = existing.el.querySelectorAll(".tool-pre");
           if (pres.length === 1) {
             const body = existing.el.querySelector(".tool-body");
@@ -1449,6 +1506,8 @@ function handleEvent(wire: WireEvent) {
         deliverables && typeof deliverables === "object" && !Array.isArray(deliverables) ? Object.keys(deliverables) : [];
       startTurnStatus(ev.time);
       updateRunning();
+      // 回合分隔线 + 「还原检查点」(回合级 Git 回退,检查点由服务端插件在回合开始前创建)
+      renderRbDivider(data?.turn ?? 0);
       break;
     }
     case "plan/mode": {
@@ -1920,7 +1979,6 @@ function renderContextBar() {
 
 // ---------- 会话统计行(上下文条上方) ----------
 
-/** 待办事项面板(Codex 风格:任务进度摘要 + 清单)。 */
 /** 待办事项面板(Web 端风格:任务标题 + 计数摘要 + 展开清单)。 */
 function applyQueueItems(items: any[]) {
   // 差集清理:已从队列移除的项(如插话后转正、被移除)删除对应节点
@@ -1950,6 +2008,107 @@ function applyQueueItems(items: any[]) {
     state.queuedIds.set(id, node);
     appendNode(node);
   }
+}
+
+// ---------- 回合级 Git 回退(检查点分隔线 + 回退确认) ----------
+
+/** 渲染回合分隔线:该回合有检查点记录时附「还原检查点」按钮。 */
+function renderRbDivider(turn: number) {
+  if (turn <= 0) return;
+  const cp = state.rbCheckpoints.get(turn);
+  appendNode({ kind: "rbDivider", key: `rb:${turn}`, el: null, turn, rbCommit: cp?.commit });
+}
+
+/** 请求回退预览并弹出确认卡片。 */
+function requestRollbackReview(turn: number) {
+  const requestId = String(++state.rbRequestId);
+  state.rbReview = { requestId, turn, el: null, loading: true };
+  renderRbReview();
+  vscode.postMessage({ kind: "rollbackPreview", requestId, turn });
+}
+
+/** 渲染回退确认卡片(预览加载/结果/确认按钮),挂在消息区末尾。 */
+function renderRbReview() {
+  const r = state.rbReview;
+  r?.el?.remove();
+  if (!r) return;
+  const card = el("div", "msg rb-review-card");
+  r.el = card;
+  const title = el("div", "rb-review-title");
+  title.append(lineIcon(ICONS.undo, 13), el("span", undefined, t("回退预览") + ` · ` + t("回合 {turn}", { turn: String(r.turn) })));
+  card.append(title);
+  if (r.loading) {
+    card.append(el("div", "rb-review-body", t("正在计算…")));
+  } else if (r.error) {
+    card.append(el("div", "rb-review-body rb-error", r.error));
+    const close = el("button", "btn rb-btn", t("取消"));
+    close.addEventListener("click", () => { state.rbReview = null; card.remove(); });
+    card.append(close);
+  }
+  messages.append(card);
+  scrollToBottom();
+}
+
+/** 渲染回退预览结果(文件列表 + 确认/取消)。 */
+function renderRbPreviewResult(preview: any) {
+  const r = state.rbReview;
+  if (!r) return;
+  r.loading = false;
+  const card = r.el;
+  if (!card) return;
+  card.innerHTML = "";
+  const title = el("div", "rb-review-title");
+  title.append(lineIcon(ICONS.undo, 13), el("span", undefined, t("回退预览") + ` · ` + t("回合 {turn}", { turn: String(r.turn) })));
+  card.append(title);
+  const body = el("div", "rb-review-body");
+  const files = preview?.files ?? [];
+  if (files.length === 0) {
+    body.append(el("div", "rb-empty", t("无文件改动")));
+  } else {
+    for (const f of files) {
+      const row = el("div", "rb-file-row");
+      const label = el("span", "rb-file-path", f.path);
+      const stat = el("span", "rb-file-stat", `+${f.added} -${f.deleted}`);
+      row.append(label, stat);
+      row.addEventListener("click", () => {
+        if (row.classList.contains("open")) {
+          row.classList.remove("open");
+          row.querySelector(".rb-file-diff")?.remove();
+          return;
+        }
+        row.classList.add("open");
+        const reqId = String(++state.rbRequestId);
+        const diffEl = el("pre", "rb-file-diff", t("加载中…"));
+        row.append(diffEl);
+        vscode.postMessage({ kind: "rollbackDiff", requestId: reqId, path: f.path, commit: preview.commit });
+        // 响应回来后填充
+        const onData = (ev: MessageEvent) => {
+          const msg = ev.data;
+          if (msg?.kind === "rollbackDiffData" && msg.requestId === reqId) {
+            window.removeEventListener("message", onData);
+            diffEl.textContent = msg.diff ?? msg.error ?? "";
+          }
+        };
+        window.addEventListener("message", onData);
+      });
+      body.append(row);
+    }
+    const removed = preview.removedUntracked?.length ?? 0;
+    if (removed > 0) body.append(el("div", "rb-note", t("回退将删除 {n} 个未跟踪文件", { n: String(removed) })));
+  }
+  card.append(body);
+  const actions = el("div", "rb-actions");
+  const cancel = el("button", "btn rb-btn", t("取消"));
+  cancel.addEventListener("click", () => { state.rbReview = null; card.remove(); });
+  const confirm = el("button", "btn rb-btn rb-confirm", t("确认回退"));
+  confirm.addEventListener("click", () => {
+    vscode.postMessage({ kind: "command", line: `/rollback ${r.turn}` });
+    state.rbReview = null;
+    card.remove();
+  });
+  actions.append(cancel, confirm);
+  card.append(actions);
+  scrollToBottom();
 }
 
 function renderTodos() {
@@ -2458,6 +2617,8 @@ function handleMessage(msg: any) {
         vscode.postMessage({ kind: "getSubagents" });
         vscode.postMessage({ kind: "getActiveFile" });
         vscode.postMessage({ kind: "getClaudeConfig" });
+        // 回合检查点记录(渲染「还原检查点」分隔线)
+        vscode.postMessage({ kind: "rollbackCheckpoints", requestId: "init", sessionId: state.current });
       }
       scrollToBottom();
       break;
@@ -2521,6 +2682,41 @@ function handleMessage(msg: any) {
     case "workspaces": {
       state.workspaces = msg.workspaces ?? [];
       refreshList();
+      break;
+    }
+    case "rollbackCheckpointsData": {
+      // 回合检查点记录:填充分隔线数据;历史已渲染的回合补插分隔线
+      state.rbCheckpoints = new Map();
+      if (msg.error) break;
+      for (const cp of msg.checkpoints ?? []) {
+        state.rbCheckpoints.set(cp.turn, { turn: cp.turn, time: cp.time, commit: cp.commit, hasAfter: !!cp.hasAfter });
+      }
+      // 消息流里尚未插入分隔线的回合补插(turn/start 先于 checkpoints 到达的场景)
+      const inserted = new Set(state.nodes.filter((n) => n.kind === "rbDivider").map((n) => n.turn));
+      for (const [turn] of state.rbCheckpoints) {
+        if (!inserted.has(turn)) {
+          // 找到该回合的第一条消息节点位置,在其前插入分隔线
+          const idx = state.nodes.findIndex((n) => (n.kind === "assistant" || n.kind === "user") && (n.turn ?? 0) >= turn);
+          if (idx >= 0) {
+            const cp = state.rbCheckpoints.get(turn);
+            const node: NodeState = { kind: "rbDivider", key: `rb:${turn}`, el: null, turn, rbCommit: cp?.commit };
+            state.nodes.splice(idx, 0, node);
+            node.el = renderNode(node);
+            messages.insertBefore(node.el, state.nodes[idx + 1]?.el ?? null);
+          }
+        }
+      }
+      break;
+    }
+    case "rollbackPreviewData": {
+      const r = state.rbReview;
+      if (!r || msg.requestId !== r.requestId) break;
+      if (msg.preview) renderRbPreviewResult(msg.preview);
+      else {
+        r.loading = false;
+        r.error = String(msg.error ?? "");
+        renderRbReview();
+      }
       break;
     }
     case "sessions": {

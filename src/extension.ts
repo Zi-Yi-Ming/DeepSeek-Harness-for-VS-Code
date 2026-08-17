@@ -1,8 +1,10 @@
 import * as vscode from "vscode";
+import { join } from "node:path";
 import { DshHub, type HubStatus } from "./dsh/hub";
 import { createTranslator } from "./dsh/i18n";
 import { registerChatParticipant } from "./dsh/chatParticipant";
 import { registerCommitMessageCommand } from "./dsh/commitMessage";
+import { ensureRollbackPluginInstalled } from "./dsh/rollbackInstall";
 import { folderCwd } from "./dsh/participantSessions";
 import { ChatPanelProvider } from "./webview/panel";
 import { ChatWindowProvider } from "./webview/window";
@@ -49,6 +51,45 @@ export function activate(ctx: vscode.ExtensionContext) {
     onLog: (message) => output.appendLine(message),
   });
   output.appendLine(`[activate] 服务器地址 ${dshUrl()}`);
+
+  // ---------- 回合级 Git 回退服务端插件:自动安装进用户的 DSH web profile(移植自上游) ----------
+  // 快照/回退命令(/rollback /redo /checkpoints)由服务端插件承担;扩展把编译好的插件
+  // 打进 vsix 的 resources/dsh-git-rollback,激活时幂等安装(带版本标记),服务器下次启动生效。
+  const bundledRollbackDir = join(ctx.extensionUri.fsPath, "resources", "dsh-git-rollback");
+  const rollbackInstall = { checked: false };
+  const installPromise = (async () => {
+    if (!cfg().get<boolean>("installRollbackPlugin", true)) return;
+    const result = await ensureRollbackPluginInstalled(bundledRollbackDir);
+    output.appendLine(`[rollback-plugin] 安装结果: ${JSON.stringify(result)}`);
+  })();
+  void installPromise;
+  // 服务器上线后:若插件文件已就位但运行中的服务器未加载(安装发生在服务器启动之后),提示一键重启
+  const checkRollbackActive = async () => {
+    if (rollbackInstall.checked || !cfg().get<boolean>("installRollbackPlugin", true)) return;
+    rollbackInstall.checked = true;
+    const status = hub.status;
+    if (!status.serverUp || status.serverStarting) return;
+    const sid = hub.store.currentSessionId;
+    if (!sid) return;
+    try {
+      const res = await hub.client.executeCommand(sid, "/checkpoints").catch(() => ({ result: { kind: "error" as const, text: "transport" } }));
+      if (res.result.kind === "success") {
+        output.appendLine("[rollback-plugin] 已就绪");
+        return;
+      }
+    } catch {
+      // 忽略,走未就绪提示
+    }
+    // 插件未注册(服务器在安装前启动):提示重启服务器
+    const pick = await vscode.window.showInformationMessage(t("msg.rollbackRestartHint"), t("msg.rollbackRestartAction"));
+    if (pick === t("msg.rollbackRestartAction")) {
+      await vscode.commands.executeCommand("dsh.stopServer");
+      await vscode.commands.executeCommand("dsh.startServer");
+    }
+  };
+  hub.onStatus((status) => {
+    if (status.serverUp && status.muxConnected) void checkRollbackActive();
+  });
 
   // ---------- 工作区自动同步 ----------
   // 把 VS Code 当前打开的文件夹自动采纳为 DSH 工作区(workspace.create),

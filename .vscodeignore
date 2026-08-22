@@ -9,4 +9,5 @@ tsconfig.json
 **/*.ts
 .gitignore
 tools/**
+tests/**
 dist/test.js

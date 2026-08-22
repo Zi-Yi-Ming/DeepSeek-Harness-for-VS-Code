@@ -4,7 +4,7 @@
 
 在 VS Code 中直接使用 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`)——完整聊天界面、`@dsh` 内置聊天参与者、回合级 Git 回退,与 Web 端实时双向同步。
 
-[![Version](https://img.shields.io/badge/version-0.10.0-blue)](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases)
+[![Version](https://img.shields.io/badge/version-0.11.1-blue)](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases)
 [![VS Code](https://img.shields.io/badge/VS%20Code-%3E%3D1.90-007acc)](https://code.visualstudio.com)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-win%20%7C%20mac%20%7C%20linux-lightgrey)](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code)
@@ -18,9 +18,110 @@
 
 ---
 
-> **个人修改版(fork:foorgange)**
+> **个人修改版(fork:foorgange)/ Personal fork (foorgange)**
 >
 > 本仓库是 [NEXTINDIE/DeepSeek-Harness-for-VS-Code](https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code) 的个人 fork 修改版,在原版基础上深度定制,包含大量个人改动(部分改动已以 PR #3~#6 回馈上游)。
+>
+> This is a personal fork of [NEXTINDIE/DeepSeek-Harness-for-VS-Code](https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code), deeply customized beyond the original (PRs #3~#6 were contributed back upstream).
+
+---
+
+# English Documentation
+
+## Overview
+
+DeepSeek Harness for VS Code brings the full DeepSeek Harness agent experience into VS Code: a persistent conversation list in the secondary sidebar, each conversation opened as an editor tab alongside your code, and a built-in `@dsh` chat participant in the native VS Code Chat panel. The interface is fully bilingual (Chinese / English) and switches instantly.
+
+## Features
+
+### Interface & Interaction
+
+- **Conversation tabs**: each session opens as its own editor tab, share the tab bar with code files, switch freely
+- **Sidebar conversation list**: grouped by workspace, searchable, collapsible; running sessions show a highlight dot
+- **Standalone chat window**: `DSH: Open Chat as Editor Tab` command, plus a secondary-sidebar sub-tab
+- **Modern chat UI**: large rounded input, capsule toolbar (thinking depth / model / preset / permission), centered content with capped width
+- **Motion**: message fade-in, streaming caret, button transitions — all respect `prefers-reduced-motion`
+- **Line-only icons**: no emoji anywhere; monochrome SVGs adapt to light/dark themes
+
+### Conversation Capabilities
+
+- **Live session stats**: turns / steps / LLM and tool time / first token / tok/s / cache hits / input & output tokens, always visible, refreshed every 5 s
+- **Task progress panel**: "N in progress · M pending" summary plus an expandable list (done / active / pending states)
+- **Steer while running**: `Ctrl+Enter` interrupts the current turn and sends immediately; queued messages carry a "Send as steer" button
+- **Turn-level Git rollback**: checkpoint dividers with "Restore checkpoint" — a review preview (per-file diff) is shown first, then the workspace is restored; `/undo` `/redo` `/checkpoints` supported
+- **Approval / question cards**: tool-call approvals, multi-select questions, plan-mode confirmation
+- **Live queue sync**: queue state forwarded in real time; steer / remove take effect instantly
+- **Agent skill integration**: the `+` menu inserts plan mode, compact, goal, feedback commands, plus workspace `.claude` / `.codex` / Copilot instructions and skills
+
+### Two-Way Sync with the Web
+
+- History: sessions from the web UI open in the extension with full history (auto backfill + "load earlier" paging)
+- Permission presets, models, reasoning effort: changing either side updates the other instantly
+- Workspaces and their sessions: new sessions auto-attach to the current workspace and are visible in the web sidebar
+- Stats / tasks / goal cards refresh in real time, matching the web UI
+
+### Settings Panel (new in 0.11.0)
+
+Open the gear button in the sidebar title bar (or the `DSH: Settings` command). The panel has 6 tabs:
+
+- **General**: interface language (follow system / Chinese / English) plus web-synced general settings (web theme, conversation behavior, agent loop, shell, default permission, web search) — schema-driven forms that write to the DSH settings document, **two-way synced with the web UI**
+- **Models**: set the default model (provider / model / reasoning effort), browse available models per provider, and manage API credentials (set / clear)
+- **Agent Presets**: set the default preset, browse the preset list (system / user), copy or remove user presets
+- **Plugins**: enable / disable DSH plugins and MCP servers (writes to `cordis.patch.yml`, effective after a server restart)
+- **Skills**: overview of the skills currently available to DSH and their descriptions
+- **Server**: connection status, one-click restart, and direct access to `cordis.patch.yml`
+
+### Other
+
+- **SCM commit messages**: a "Generate commit message" button in the source control title bar — DSH writes one from your diff
+- **`@dsh` chat participant**: pick `dsh` from `@` in the native Chat panel; `/new`, `/session <ID>`, `/preset <name>` supported
+- **New conversation placement**: auto-attach to the workspace of the current folder (with a directory picker fallback)
+- **Long-history fix**: streaming chunks are filtered during replay — sessions with 120k+ events stay responsive
+- **Emoji-free by design**: no emoji in source, plus runtime filtering (even server data is cleaned)
+
+## Installation
+
+**Option 1 (recommended): VS Code Marketplace**
+
+Search `DeepSeek Harness` in the Extensions view (publisher `foorgange`) or open the [Marketplace page](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode).
+
+**Option 2: GitHub Releases**
+
+Download the latest `.vsix` from [Releases](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases), then: Extensions → `...` (top right) → **Install from VSIX**.
+
+**Requirements**: VS Code 1.90+; `dsh` available on the machine (the server auto-starts, or run `dsh web` manually).
+
+## Usage
+
+1. Open any folder — it is auto-adopted as a DSH workspace
+2. Click the DeepSeek Harness icon in the activity bar / secondary sidebar to see the conversation list; `+` creates a new conversation
+3. Chat in the editor tab, or type `@` and pick `dsh` in the native Chat panel
+4. Click the gear button anytime to switch language or manage plugins
+
+## Keyboard Shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Send message | `Enter` (Shift+Enter for newline) |
+| Steer (interrupt current turn) | `Ctrl+Enter` (macOS `Cmd+Enter`) |
+| Stop response | Button at the right of the input |
+
+## Development
+
+```bash
+npm install
+npm run typecheck     # type checking
+npm run build         # esbuild → dist/
+npm test              # smoke tests (store / render / artifact / plugin registry / settings)
+npm run package       # build and package .vsix into Releases/
+```
+
+## Links
+
+- Fork repository: https://github.com/foorgange/DeepSeek-Harness-for-VS-Code
+- Upstream: https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code
+- DeepSeek Harness: https://github.com/deepseek-ai/deepseek-harness
+- PRs contributed upstream: #3 (workspace sync), #4 (whale icon), #5 (editor tabs + session list), #6 (emoji-free)
 
 ---
 
@@ -111,7 +212,7 @@ VS Code → 扩展 → 右上角 `...` → **从 VSIX 安装**。
 npm install
 npm run typecheck     # 类型检查
 npm run build         # esbuild 构建 dist/
-npm test              # 冒烟测试(store 链路 / 渲染 / 产物 / 插件注册表)
+npm test              # 冒烟测试(store 链路 / 渲染 / 产物 / 插件注册表 / 设置面板)
 npm run package       # 构建并打包 .vsix 到 Releases/
 ```
 
@@ -121,102 +222,3 @@ npm run package       # 构建并打包 .vsix 到 Releases/
 - 上游:https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code
 - DSH 本体:https://github.com/deepseek-ai/deepseek-harness
 - 回馈上游的 PR:#3(工作区同步)、#4(鲸鱼图标)、#5(编辑器标签页+会话列表)、#6(去 emoji)
-
----
-
-# English Documentation
-
-## Overview
-
-DeepSeek Harness for VS Code brings the full DeepSeek Harness agent experience into VS Code: a persistent conversation list in the secondary sidebar, each conversation opened as an editor tab alongside your code, and a built-in `@dsh` chat participant in the native VS Code Chat panel. The interface is fully bilingual (Chinese / English) and switches instantly.
-
-## Features
-
-### Interface & Interaction
-
-- **Conversation tabs**: each session opens as its own editor tab, share the tab bar with code files, switch freely
-- **Sidebar conversation list**: grouped by workspace, searchable, collapsible; running sessions show a highlight dot
-- **Standalone chat window**: `DSH: Open Chat as Editor Tab` command, plus a secondary-sidebar sub-tab
-- **Modern chat UI**: large rounded input, capsule toolbar (thinking depth / model / preset / permission), centered content with capped width
-- **Motion**: message fade-in, streaming caret, button transitions — all respect `prefers-reduced-motion`
-- **Line-only icons**: no emoji anywhere; monochrome SVGs adapt to light/dark themes
-
-### Conversation Capabilities
-
-- **Live session stats**: turns / steps / LLM and tool time / first token / tok/s / cache hits / input & output tokens, always visible, refreshed every 5 s
-- **Task progress panel**: "N in progress · M pending" summary plus an expandable list (done / active / pending states)
-- **Steer while running**: `Ctrl+Enter` interrupts the current turn and sends immediately; queued messages carry a "Send as steer" button
-- **Turn-level Git rollback**: checkpoint dividers with "Restore checkpoint" — a review preview (per-file diff) is shown first, then the workspace is restored; `/undo` `/redo` `/checkpoints` supported
-- **Approval / question cards**: tool-call approvals, multi-select questions, plan-mode confirmation
-- **Live queue sync**: queue state forwarded in real time; steer / remove take effect instantly
-- **Agent skill integration**: the `+` menu inserts plan mode, compact, goal, feedback commands, plus workspace `.claude` / `.codex` / Copilot instructions and skills
-
-### Two-Way Sync with the Web
-
-- History: sessions from the web UI open in the extension with full history (auto backfill + "load earlier" paging)
-- Permission presets, models, reasoning effort: changing either side updates the other instantly
-- Workspaces and their sessions: new sessions auto-attach to the current workspace and are visible in the web sidebar
-- Stats / tasks / goal cards refresh in real time, matching the web UI
-
-### Settings Panel (new in 0.11.0)
-
-Open the gear button in the sidebar title bar (or the `DSH: Settings` command). The panel has 6 tabs:
-
-- **General**: interface language (follow system / Chinese / English) plus web-synced general settings (web theme, conversation behavior, agent loop, shell, default permission, web search) — schema-driven forms that write to the DSH settings document, **two-way synced with the web UI**
-- **Models**: set the default model (provider / model / reasoning effort), browse available models per provider, and manage API credentials (set / clear)
-- **Agent Presets**: set the default preset, browse the preset list (system / user), copy or remove user presets
-- **Plugins**: enable / disable DSH plugins and MCP servers (writes to `cordis.patch.yml`, effective after a server restart)
-- **Skills**: overview of the skills currently available to DSH and their descriptions
-- **Server**: connection status, one-click restart, and direct access to `cordis.patch.yml`
-
-### Other
-
-- **SCM commit messages**: a "Generate commit message" button in the source control title bar — DSH writes one from your diff
-- **`@dsh` chat participant**: pick `dsh` from `@` in the native Chat panel; `/new`, `/session <ID>`, `/preset <name>` supported
-- **New conversation placement**: auto-attach to the workspace of the current folder (with a directory picker fallback)
-- **Long-history fix**: streaming chunks are filtered during replay — sessions with 120k+ events stay responsive
-- **Emoji-free by design**: no emoji in source, plus runtime filtering (even server data is cleaned)
-
-## Installation
-
-**Option 1 (recommended): VS Code Marketplace**
-
-Search `DeepSeek Harness` in the Extensions view (publisher `foorgange`) or open the [Marketplace page](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode).
-
-**Option 2: GitHub Releases**
-
-Download the latest `.vsix` from [Releases](https://github.com/foorgange/DeepSeek-Harness-for-VS-Code/releases), then: Extensions → `...` (top right) → **Install from VSIX**.
-
-**Requirements**: VS Code 1.90+; `dsh` available on the machine (the server auto-starts, or run `dsh web` manually).
-
-## Usage
-
-1. Open any folder — it is auto-adopted as a DSH workspace
-2. Click the DeepSeek Harness icon in the activity bar / secondary sidebar to see the conversation list; `+` creates a new conversation
-3. Chat in the editor tab, or type `@` and pick `dsh` in the native Chat panel
-4. Click the gear button anytime to switch language or manage plugins
-
-## Keyboard Shortcuts
-
-| Action | Shortcut |
-|---|---|
-| Send message | `Enter` (Shift+Enter for newline) |
-| Steer (interrupt current turn) | `Ctrl+Enter` (macOS `Cmd+Enter`) |
-| Stop response | Button at the right of the input |
-
-## Development
-
-```bash
-npm install
-npm run typecheck     # type checking
-npm run build         # esbuild → dist/
-npm test              # smoke tests (store / render / artifact / plugin registry)
-npm run package       # build and package .vsix into Releases/
-```
-
-## Links
-
-- Fork repository: https://github.com/foorgange/DeepSeek-Harness-for-VS-Code
-- Upstream: https://github.com/NEXTINDIE/DeepSeek-Harness-for-VS-Code
-- DeepSeek Harness: https://github.com/deepseek-ai/deepseek-harness
-- PRs contributed upstream: #3 (workspace sync), #4 (whale icon), #5 (editor tabs + session list), #6 (emoji-free)

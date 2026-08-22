@@ -2,7 +2,7 @@
   "name": "dsh-vscode",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "publisher": "foorgange",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -260,7 +260,7 @@
     "watch": "node esbuild.mjs --watch",
     "package": "npm run build && node tools/clean-releases.mjs && vsce package -o Releases",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/smoke/store.test.js && node tests/smoke/render.test.js && node tests/smoke/artifact.test.js && node tests/smoke/plugin-registry.test.js"
+    "test": "node tests/smoke/store.test.js && node tests/smoke/render.test.js && node tests/smoke/artifact.test.js && node tests/smoke/plugin-registry.test.js && node tests/smoke/settings.test.js"
   },
   "dependencies": {
     "dompurify": "^3.2.4",

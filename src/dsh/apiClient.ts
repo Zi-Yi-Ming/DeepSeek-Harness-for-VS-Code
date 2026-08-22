@@ -5,6 +5,8 @@ import type {
   ClientRequest,
   HostFrame,
   HostDescribeValue,
+  LlmModelGroup,
+  LlmProviderView,
   MuxFrame,
   SessionCreateRequest,
   SessionCreateValue,
@@ -14,6 +16,7 @@ import type {
   SessionModelsValue,
   SessionPromptRequest,
   SessionPromptValue,
+  SettingsNamespaceView,
   ApprovalAnswer,
   QuestionAnswer,
   SubagentEntry,
@@ -171,6 +174,39 @@ export class DshApiClient {
   }
   selectAgentPreset(sessionId: string, agentPreset: string) {
     return this.post<{ agentPreset: string }>("agentPreset.select", { sessionId, agentPreset });
+  }
+  copyAgentPreset(id: string) {
+    return this.post<{ id: string; name?: string }>("agentPreset.copy", { id });
+  }
+  removeAgentPreset(id: string) {
+    return this.post<{ removed: true }>("agentPreset.remove", { id });
+  }
+
+  // ---------- 设置(与 Web 端共用的 settings 文档,双向同步) ----------
+
+  settingsDescribe() {
+    return this.post<{ writable: boolean; hasDocument: boolean; namespaces: SettingsNamespaceView[] }>("settings.describe", {});
+  }
+  settingsUpdate(ns: string, patch: Record<string, unknown>) {
+    return this.post<SettingsNamespaceView>("settings.update", { ns, patch });
+  }
+
+  // ---------- LLM 模型 / 凭据 ----------
+
+  llmProviders() {
+    return this.post<{ providers: LlmProviderView[] }>("llm.providers", {});
+  }
+  llmModels() {
+    return this.post<{ groups: LlmModelGroup[]; failures: { id: string; name: string; message: string }[] }>("llm.models", {});
+  }
+  credentialsDescribe(refs: string[]) {
+    return this.post<{ credentials: Record<string, { configured: boolean; writable: boolean; source?: string }> }>("credentials.describe", { refs });
+  }
+  credentialsSet(ref: string, value: string) {
+    return this.post<{}>("credentials.set", { ref, value });
+  }
+  credentialsUnset(ref: string) {
+    return this.post<{}>("credentials.unset", { ref });
   }
 
   // goals

@@ -128,5 +128,11 @@
   "settings.toggleFailed": "切换插件状态失败: {error}",
   "settings.languageApplied": "界面语言已切换。",
   "settings.serverOffline": "服务器不在线,无法重启。",
-  "settings.openPatchFailed": "无法打开配置文件: {error}"
+  "settings.openPatchFailed": "无法打开配置文件: {error}",
+  "settings.saved": "设置已保存,已同步到 Web 端。",
+  "settings.saveFailed": "保存失败: {error}",
+  "settings.presetCopied": "已复制预设: {id}",
+  "settings.presetRemoved": "预设已删除。",
+  "settings.credentialSet": "已设置凭据: {ref}",
+  "settings.credentialUnset": "已清除凭据: {ref}"
 }

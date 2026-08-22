@@ -56,14 +56,16 @@ DeepSeek Harness for VS Code 把 DeepSeek Harness 的智能体能力完整搬进
 - 工作区与其中的会话:新建会话自动挂入当前工作区,Web 端按工作区分组可见
 - 会话统计 / 任务进度 / 目标卡片:实时刷新,与 Web 端一致
 
-### 设置面板(0.10.0 新增)
+### 设置面板(0.11.0)
 
-侧边栏标题栏的齿轮按钮(或命令 `DSH: Settings`)打开设置面板:
+侧边栏标题栏的齿轮按钮(或命令 `DSH: Settings`)打开设置面板,分 6 个标签页:
 
-- **界面语言切换**:跟随系统 / 中文 / English,即时生效,聊天与设置界面同步切换
-- **DSH 插件管理**:列出 profile 中已安装的插件与 MCP 服务(名称、类型、传输方式、命令/地址),一键启用 / 禁用,写入 `cordis.patch.yml`,重启服务器后生效
-- **技能一览**:展示 DSH 当前可用的技能及其说明
-- **服务器操作**:查看连接状态、一键重启服务器、直接打开 `cordis.patch.yml` 配置文件
+- **通用**:界面语言切换(跟随系统 / 中文 / English)+ Web 端同源的通用设置(界面主题、对话行为、Agent 循环、Shell、权限默认值、Web 搜索),基于 schema 自动渲染表单,保存即写入 DSH settings 文档,**与 Web 端双向同步**
+- **模型**:设置默认模型(提供方 / 模型 / 思考深度)、浏览可用模型清单、管理各提供方的 API 凭据(设置 / 清除)
+- **Agent 预设**:设置默认预设、浏览预设列表(系统 / 用户),支持复制与删除用户预设
+- **插件**:DSH 插件与 MCP 服务的启用 / 禁用(写入 `cordis.patch.yml`,重启服务器后生效)
+- **技能**:展示 DSH 当前可用的技能及其说明
+- **服务器**:连接状态、一键重启、直接打开 `cordis.patch.yml`
 
 ### 其他
 
@@ -154,14 +156,16 @@ DeepSeek Harness for VS Code brings the full DeepSeek Harness agent experience i
 - Workspaces and their sessions: new sessions auto-attach to the current workspace and are visible in the web sidebar
 - Stats / tasks / goal cards refresh in real time, matching the web UI
 
-### Settings Panel (new in 0.10.0)
+### Settings Panel (new in 0.11.0)
 
-Open the gear button in the sidebar title bar (or the `DSH: Settings` command):
+Open the gear button in the sidebar title bar (or the `DSH: Settings` command). The panel has 6 tabs:
 
-- **Interface language**: follow system / Chinese / English — applies immediately to chat and settings
-- **DSH plugin management**: list installed plugins and MCP servers from the profile (name, type, transport, command/URL) and enable / disable them with one click; writes to `cordis.patch.yml`, effective after a server restart
-- **Skills overview**: shows the skills currently available to DSH and their descriptions
-- **Server actions**: connection status, one-click restart, and direct access to the `cordis.patch.yml` config file
+- **General**: interface language (follow system / Chinese / English) plus web-synced general settings (web theme, conversation behavior, agent loop, shell, default permission, web search) — schema-driven forms that write to the DSH settings document, **two-way synced with the web UI**
+- **Models**: set the default model (provider / model / reasoning effort), browse available models per provider, and manage API credentials (set / clear)
+- **Agent Presets**: set the default preset, browse the preset list (system / user), copy or remove user presets
+- **Plugins**: enable / disable DSH plugins and MCP servers (writes to `cordis.patch.yml`, effective after a server restart)
+- **Skills**: overview of the skills currently available to DSH and their descriptions
+- **Server**: connection status, one-click restart, and direct access to `cordis.patch.yml`
 
 ### Other
 

@@ -128,5 +128,11 @@
   "settings.toggleFailed": "Failed to toggle the plugin: {error}",
   "settings.languageApplied": "Interface language switched.",
   "settings.serverOffline": "The server is offline; cannot restart it.",
-  "settings.openPatchFailed": "Cannot open the config file: {error}"
+  "settings.openPatchFailed": "Cannot open the config file: {error}",
+  "settings.saved": "Settings saved and synced to the web UI.",
+  "settings.saveFailed": "Save failed: {error}",
+  "settings.presetCopied": "Preset copied: {id}",
+  "settings.presetRemoved": "Preset removed.",
+  "settings.credentialSet": "Credential set: {ref}",
+  "settings.credentialUnset": "Credential cleared: {ref}"
 }

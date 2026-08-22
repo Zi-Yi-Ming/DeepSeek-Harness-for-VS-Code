@@ -244,6 +244,50 @@ export interface SkillEntry {
   modelInvocable: boolean;
 }
 
+// ---------- 设置文档(settings.describe / update,与 Web 端共用) ----------
+
+/** schemastery schema 节点(settings.describe 的 schema 字段)。 */
+export interface SettingsSchemaNode {
+  uid: number;
+  type: string;
+  meta?: { required?: boolean; default?: unknown; min?: number; max?: number; step?: number; role?: string; value?: unknown };
+  dict?: Record<string, number>;
+  inner?: number;
+  list?: number[];
+  sKey?: number;
+}
+
+export interface SettingsSchemaRoot {
+  uid: number;
+  refs: Record<string, SettingsSchemaNode>;
+}
+
+export interface SettingsNamespaceView {
+  ns: string;
+  schema: SettingsSchemaRoot;
+  value: Record<string, unknown>;
+  base?: Record<string, unknown>;
+  user?: Record<string, unknown>;
+  applies: "live" | "restart";
+  secrets: { path: string[]; set: boolean }[];
+  revision: number;
+}
+
+export interface LlmProviderView {
+  provider: string;
+  displayName: string;
+  settingsNs: string;
+  settingsPath: string[];
+  active: boolean;
+  declared?: boolean;
+}
+
+export interface LlmModelGroup {
+  id: string;
+  name: string;
+  models: { id: string; name: string; reasoning?: { efforts: { id: string; name: string }[]; defaultEffort?: string } }[];
+}
+
 export type SubagentEntry =
   | { kind: "child"; id: string; mode: "one-shot" | "continuable"; activity: "running" | "inactive"; hasChildren: boolean; label?: string }
   | { kind: "diagnostic"; id: string; reason: string };

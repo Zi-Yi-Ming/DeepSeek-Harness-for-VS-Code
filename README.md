@@ -83,7 +83,7 @@ Open the gear button in the sidebar title bar (or the `DSH: Settings` command). 
 
 **Option 1 (recommended): VS Code Marketplace**
 
-Search `DeepSeek Harness` in the Extensions view (publisher `foorgange`) or open the [Marketplace page](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode).
+Search `DeepSeek Harness` in the Extensions view (publisher `foorgange`) or open the [Marketplace page](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode-pro).
 
 **Option 2: GitHub Releases**
 
@@ -182,7 +182,7 @@ DeepSeek Harness for VS Code 把 DeepSeek Harness 的智能体能力完整搬进
 
 **方式一(推荐):VS Code 扩展市场**
 
-在 VS Code 扩展视图搜索 `DeepSeek Harness` 直接安装(发布者 `foorgange`),或访问 [Marketplace 页面](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode)。
+在 VS Code 扩展视图搜索 `DeepSeek Harness` 直接安装(发布者 `foorgange`),或访问 [Marketplace 页面](https://marketplace.visualstudio.com/items?itemName=foorgange.dsh-vscode-pro)。
 
 **方式二:从 GitHub Releases 安装**
 

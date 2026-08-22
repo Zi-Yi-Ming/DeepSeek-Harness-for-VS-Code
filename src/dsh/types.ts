@@ -151,10 +151,15 @@ export interface SessionHistoryValue {
   projections?: { asOfSeq: number; values: Record<string, any> };
 }
 
+/** prompt 内容块:文本或图片(与网页端一致的 wire 协议,图片为 base64)。 */
+export type PromptContentBlock =
+  | { type: "text"; text: string }
+  | { type: "image"; mediaType: string; data: string; name?: string };
+
 export interface SessionPromptRequest {
   sessionId: string;
   mode: "queue" | "steer";
-  content: { type: "text"; text: string }[];
+  content: PromptContentBlock[];
   clientTimeZone?: string;
 }
 export interface SessionPromptValue {

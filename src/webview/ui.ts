@@ -158,7 +158,11 @@ const state = {
   /** 本轮工具节点(回合结束时折叠为摘要) */
   currentTurnTools: [] as NodeState[],
   /** 附件:自动附加的激活文件 + 手动选择 */
-  attachments: [] as { kind: "file" | "folder"; path: string; label: string; auto?: boolean }[],
+  /** 附件:自动附加的激活文件 + 手动选择 + 粘贴/选取的图片(kind=image 时带 base64) */
+  attachments: [] as (
+    | { kind: "file" | "folder"; path: string; label: string; auto?: boolean }
+    | { kind: "image"; mediaType: string; data: string; label: string; name?: string }
+  )[],
   autoAttachActive: true,
   activeFile: null as { path: string; label: string; languageId?: string } | null,
   skills: null as { name: string; description: string; whenToUse?: string; modelInvocable: boolean }[] | null,
@@ -765,7 +769,8 @@ input.addEventListener("keydown", (e) => {
 });
 btnSendStop.addEventListener("click", () => {
   const hasText = input.value.trim().length > 0;
-  if (state.running && !hasText) {
+  const hasImage = state.attachments.some((a) => a.kind === "image");
+  if (state.running && !hasText && !hasImage) {
     vscode.postMessage({ kind: "stop" });
     return;
   }
@@ -2248,16 +2253,24 @@ function renderAttachments() {
   attachmentsRow.append(btnAddAttach);
   const list = state.attachments;
   for (const a of list) {
-    const chip = el("span", "attachment-chip" + (a.auto ? " auto" : ""));
-    chip.title = `${a.kind === "folder" ? t("文件夹") : t("文件")}: ${a.path}`;
-    chip.append(lineIcon(a.kind === "folder" ? ICONS.box : ICONS.copy, 12));
-    chip.append(el("span", "attachment-label", (a.auto ? t("激活文件 · ") : "") + a.label));
+    const chip = el("span", "attachment-chip" + (a.kind === "image" ? " image" : "") + (a.kind !== "image" && a.auto ? " auto" : ""));
+    if (a.kind === "image") {
+      chip.title = `图片: ${a.label}`;
+      const thumb = document.createElement("img");
+      thumb.className = "attachment-thumb";
+      thumb.src = `data:${a.mediaType};base64,${a.data}`;
+      chip.append(thumb);
+    } else {
+      chip.title = `${a.kind === "folder" ? t("文件夹") : t("文件")}: ${a.path}`;
+      chip.append(lineIcon(a.kind === "folder" ? ICONS.box : ICONS.copy, 12));
+    }
+    chip.append(el("span", "attachment-label", (a.kind !== "image" && a.auto ? t("激活文件 · ") : "") + a.label));
     const close = el("button", "chip-close", "×");
     close.title = t("移除附件");
     chip.append(close);
     close.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (a.auto) {
+      if (a.kind !== "image" && a.auto) {
         state.autoAttachActive = false;
         state.activeFile = null;
       }
@@ -2268,11 +2281,39 @@ function renderAttachments() {
   }
 }
 
+/** 剪贴板图片粘贴:转 base64 图片附件(与网页端一致,视觉模型可识别)。 */
+function handlePasteImage(e: ClipboardEvent) {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  const imageItem = Array.from(items).find((item) => item.kind === "file" && item.type.startsWith("image/"));
+  if (!imageItem) return;
+  const file = imageItem.getAsFile();
+  if (!file) return;
+  e.preventDefault();
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = String(reader.result ?? "");
+    const comma = dataUrl.indexOf(",");
+    if (comma < 0) return;
+    const name = file.name || `粘贴图片.${(file.type.split("/")[1] ?? "png").replace("jpeg", "jpg")}`;
+    state.attachments.push({
+      kind: "image",
+      mediaType: file.type || "image/png",
+      data: dataUrl.slice(comma + 1),
+      label: name,
+      name,
+    });
+    renderAttachments();
+  };
+  reader.readAsDataURL(file);
+}
+input.addEventListener("paste", handlePasteImage);
+
 /** 同步自动附加的激活文件。 */
 function syncActiveFileAttachment() {
-  const existing = state.attachments.find((a) => a.auto);
+  const existing = state.attachments.find((a) => a.kind !== "image" && a.auto);
   if (existing) {
-    state.attachments = state.attachments.filter((a) => !a.auto);
+    state.attachments = state.attachments.filter((a) => a.kind !== "image" && !a.auto);
   }
   if (state.autoAttachActive && state.activeFile) {
     state.attachments.unshift({
@@ -2671,14 +2712,14 @@ function handleMessage(msg: any) {
     case "activeFile": {
       state.activeFile = msg.file ?? null;
       if (msg.file === null && state.autoAttachActive) {
-        state.attachments = state.attachments.filter((a) => !a.auto);
+        state.attachments = state.attachments.filter((a) => a.kind !== "image" && !a.auto);
       }
       syncActiveFileAttachment();
       break;
     }
     case "attachmentsPicked": {
       for (const a of msg.attachments ?? []) {
-        if (state.attachments.some((x) => x.path === a.path)) continue;
+        if (state.attachments.some((x) => x.kind !== "image" && x.path === a.path)) continue;
         state.attachments.push({ kind: a.kind, path: a.path, label: a.label ?? a.path });
       }
       renderAttachments();
@@ -2904,7 +2945,8 @@ function handleMessage(msg: any) {
 
 function sendCurrent(mode: "queue" | "steer" = "queue") {
   const text = input.value.trim();
-  if (!text) return;
+  const images = state.attachments.filter((a) => a.kind === "image");
+  if (!text && images.length === 0) return;
   if (!state.current) {
     appendNode({ kind: "note", key: `note:${Date.now()}`, el: null, text: "尚未选择会话,点击 ＋ 新建一个会话" });
     return;
@@ -2913,7 +2955,11 @@ function sendCurrent(mode: "queue" | "steer" = "queue") {
     kind: "send",
     mode,
     text,
-    attachments: state.attachments.map(({ kind, path }) => ({ kind, path })),
+    // 图片走 base64 内容块;文件/文件夹由宿主读取
+    images: images.map(({ mediaType, data, name }) => ({ mediaType, data, name })),
+    attachments: state.attachments
+      .filter((a): a is { kind: "file" | "folder"; path: string; label: string; auto?: boolean } => a.kind !== "image")
+      .map(({ kind, path }) => ({ kind, path })),
   });
   input.value = "";
   autoResize();

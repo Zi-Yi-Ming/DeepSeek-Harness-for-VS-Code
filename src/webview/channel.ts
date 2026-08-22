@@ -313,10 +313,22 @@ export class ChatChannel {
         if (this.mode === "list") this.onNewTab?.();
         break;
       case "send": {
-        if (current && typeof msg.text === "string" && msg.text.trim()) {
+        // 文本 + 图片(粘贴 / 选取的图片文件)一起发送;与 Web 端同协议
+        const images = Array.isArray(msg.images)
+          ? (msg.images as { mediaType?: string; data?: string; name?: string }[])
+              .filter((i) => i && typeof i.data === "string" && i.data.length > 0)
+              .map((i) => ({ type: "image" as const, mediaType: i.mediaType ?? "image/png", data: i.data as string, ...(i.name ? { name: i.name } : {}) }))
+          : [];
+        if (current && typeof msg.text === "string" && (msg.text.trim() || images.length > 0)) {
           try {
-            const text = await this.composeWithAttachments(msg.text, msg.attachments);
-            await this.hub.send(current, text, msg.mode === "steer" ? "steer" : "queue");
+            const composed = await this.composeWithAttachments(msg.text, msg.attachments);
+            const content = [
+              ...composed.images,
+              ...images,
+              ...(composed.text ? [{ type: "text" as const, text: composed.text }] : []),
+            ];
+            if (content.length === 0) break;
+            await this.hub.sendContent(current, content, msg.mode === "steer" ? "steer" : "queue");
             // 发送后立即刷新投影,统计行不会被回合开始时的空帧清空
             void this.hub.refreshSessions();
           } catch {
@@ -751,17 +763,35 @@ export class ChatChannel {
     return vscode.workspace.getConfiguration("dsh").get<string>("url", "http://127.0.0.1:3080");
   }
 
-  /** 把附件(文件内容 / 文件夹清单)拼进消息上下文。 */
-  private async composeWithAttachments(text: string, attachments?: { kind: "file" | "folder"; path: string }[]): Promise<string> {    const list = (attachments ?? []).slice(0, 10);
-    if (list.length === 0) return text;
+  /** 把附件拼进消息:图片文件转 base64 图片块(与 Web 端同协议),其余文件/文件夹拼文本。 */
+  private async composeWithAttachments(
+    text: string,
+    attachments?: { kind: "file" | "folder"; path: string }[],
+  ): Promise<{ text: string; images: { type: "image"; mediaType: string; data: string; name?: string }[] }> {
+    const list = (attachments ?? []).slice(0, 10);
+    if (list.length === 0) return { text, images: [] };
     const parts: string[] = [];
+    const images: { type: "image"; mediaType: string; data: string; name?: string }[] = [];
     let total = 0;
     const MAX_TOTAL = 150_000;
     const MAX_FILE = 100_000;
+    const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
     for (const a of list) {
       try {
         if (a.kind === "file") {
           const stat = await vscode.workspace.fs.stat(vscode.Uri.file(a.path));
+          const mediaType = imageMediaType(a.path);
+          if (mediaType) {
+            // 图片附件:base64 图片内容块(视觉模型可直接识别)
+            if (stat.size > MAX_IMAGE_BYTES) {
+              parts.push(`**图片 ${a.path}**(超过 15MB,未发送)`);
+              continue;
+            }
+            const buf = Buffer.from(await vscode.workspace.fs.readFile(vscode.Uri.file(a.path)));
+            const name = a.path.replace(/\\/g, "/").split("/").pop() ?? a.path;
+            images.push({ type: "image", mediaType, data: buf.toString("base64"), name });
+            continue;
+          }
           if (stat.size > 2 * 1024 * 1024) {
             parts.push(`**文件 ${a.path}**(超过 2MB,未读取内容)`);
             continue;
@@ -780,8 +810,8 @@ export class ChatChannel {
       total = parts.reduce((n, p) => n + p.length, 0);
       if (total > MAX_TOTAL) break;
     }
-    if (parts.length === 0) return text;
-    return `【附加文件/文件夹】\n${parts.join("\n\n")}\n\n【用户消息】\n${text}`;
+    const composed = parts.length > 0 ? `【附加文件/文件夹】\n${parts.join("\n\n")}\n\n【用户消息】\n${text}` : text;
+    return { text: composed, images };
   }
 
   private post(message: unknown) {
@@ -837,6 +867,24 @@ function getNonce(): string {
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
+}
+
+/** 按扩展名识别图片 MIME(与服务器 imageMediaTypeSchema 一致);非图片返回 undefined。 */
+function imageMediaType(path: string): string | undefined {
+  const ext = path.toLowerCase().split(".").pop() ?? "";
+  switch (ext) {
+    case "png":
+      return "image/png";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "webp":
+      return "image/webp";
+    case "gif":
+      return "image/gif";
+    default:
+      return undefined;
+  }
 }
 
 /** 扫描工作区的智能体/技能配置:.claude(命令与技能)、.codex(技能与配置)、.github(Copilot 指令/智能体/提示词)。 */

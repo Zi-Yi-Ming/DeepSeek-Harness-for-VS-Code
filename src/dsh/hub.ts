@@ -1,7 +1,7 @@
 import { DshApiClient, DshApiError, type FrameEnvelope } from "./apiClient";
 import { ServerManager } from "./serverManager";
 import { SessionStore, type StoredSession } from "./sessionStore";
-import type { HostFrame, MuxFrame } from "./types";
+import type { HostFrame, MuxFrame, PromptContentBlock } from "./types";
 
 export interface HubStatus {
   serverUp: boolean;
@@ -325,8 +325,13 @@ export class DshHub {
   }
 
   async send(sessionId: string, text: string, mode: "queue" | "steer" = "queue") {
+    return this.sendContent(sessionId, [{ type: "text", text }], mode);
+  }
+
+  /** 发送多块内容(文本 + 图片,与 Web 端同协议;图片为 base64 data)。 */
+  async sendContent(sessionId: string, content: PromptContentBlock[], mode: "queue" | "steer" = "queue") {
     try {
-      await this.client.sendPrompt({ sessionId, mode, content: [{ type: "text", text }] });
+      await this.client.sendPrompt({ sessionId, mode, content });
     } catch (error) {
       const message = error instanceof DshApiError ? `${error.code}: ${error.message}` : String(error);
       this.deps.onNotice?.(this.deps.t?.("hub.sendFailed", { message }) ?? `Send failed: ${message}`, "error");

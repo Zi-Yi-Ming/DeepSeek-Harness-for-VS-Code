@@ -981,6 +981,16 @@ body {
   color: #6cb8ff;
 }
 
+/* 图片附件缩略图(粘贴/选取的图片) */
+.attachment-chip.image .attachment-thumb {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--dsh-border);
+  flex: none;
+}
+
 .attachment-label {
   overflow: hidden;
   text-overflow: ellipsis;

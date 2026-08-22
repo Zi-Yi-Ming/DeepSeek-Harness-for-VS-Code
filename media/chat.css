@@ -55,6 +55,16 @@ body {
   align-self: center;
 }
 
+/* ---------- 列表模式初始化前占位(避免聊天界面闪现) ---------- */
+.list-flash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--dsh-muted);
+  font-size: 12px;
+}
+
 /* ---------- 侧边栏会话列表 ---------- */
 .list-view {
   display: flex;

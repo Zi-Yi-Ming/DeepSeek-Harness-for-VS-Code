@@ -751,7 +751,13 @@ plusMenu.hidden = true;
 composer.append(plusMenu);
 
 root.append(header, goalArea, messages, conversationBottom, pendingArea, turnStatus, composer);
-app.append(root);
+// 列表模式(侧边栏):init 到达前只渲染轻量占位,避免完整聊天界面闪现
+// (宿主在 HTML 上标记 data-dsh-mode="list";init 到达后 applyLayout 整体替换)
+if (document.body.dataset.dshMode === "list") {
+  app.append(el("div", "list-flash", t("加载中…")));
+} else {
+  app.append(root);
+}
 
 // ---------- 事件 ----------
 

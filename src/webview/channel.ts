@@ -854,7 +854,7 @@ ${this.css()}
   </style>
   <title>DSH Chat</title>
 </head>
-<body>
+<body${this.mode === "list" ? ' data-dsh-mode="list"' : ""}>
   <div id="app"></div>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>

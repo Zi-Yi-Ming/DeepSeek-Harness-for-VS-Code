@@ -221,6 +221,24 @@ async function main() {
   await wait(30);
   check("切回中文列表仍在", !!document.querySelector(".list-view") && document.querySelectorAll(".list-item").length === 1);
 
+  // 列表模式初始闪现回归:data-dsh-mode="list" 的 HTML 初始只渲染占位,不渲染聊天界面
+  {
+    const dom2 = new JSDOM(`<!DOCTYPE html><html><body data-dsh-mode="list"><div id="app"></div></body></html>`, {
+      url: "http://localhost/chat",
+      runScripts: "outside-only",
+      pretendToBeVisual: true,
+    });
+    const { window: w2 } = dom2;
+    const { document: d2 } = w2;
+    w2.acquireVsCodeApi = () => ({ postMessage: () => {}, getState: () => null, setState: () => {} });
+    w2.eval(uiJs);
+    check("列表模式初始渲染占位(无聊天界面)", !!d2.querySelector(".list-flash") && !d2.querySelector(".composer"));
+    const dispatch2 = (kind, payload) => w2.dispatchEvent(new w2.MessageEvent("message", { data: { kind, ...payload } }));
+    dispatch2("init", { mode: "list", locked: false, lang: "zh-cn", status: { connected: true }, sessions: [], current: null, events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
+    await wait(50);
+    check("init 后列表视图替换占位", !!d2.querySelector(".list-view") && !d2.querySelector(".list-flash"));
+  }
+
   let fail = 0;
   for (const [name, ok] of checks) {
     console.log((ok ? "OK  " : "FAIL") + " " + name);

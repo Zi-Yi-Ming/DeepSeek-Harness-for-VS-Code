@@ -1367,10 +1367,13 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  min-height: 24px;
+  /* 固定高度(border-box):原生 select 固有高度不一致会撑高胶囊,
+     导致同一行三个下拉(权限/思考/模型)高低错落;固定后必然同线对齐 */
+  height: 30px;
+  box-sizing: border-box;
   border: 1px solid var(--dsh-border);
   border-radius: 999px;
-  padding: 2px 10px;
+  padding: 0 10px;
   background: var(--dsh-bg);
   cursor: pointer;
 }
@@ -1398,6 +1401,7 @@ body {
   max-width: 170px;
   padding: 0;
   height: auto;
+  line-height: 1.2;
   cursor: pointer;
 }
 

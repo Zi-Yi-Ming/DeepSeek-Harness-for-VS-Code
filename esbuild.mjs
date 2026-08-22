@@ -27,11 +27,23 @@ const webviewBuild = {
   logLevel: "info",
 };
 
+/** @type {import('esbuild').BuildOptions} */
+const settingsBuild = {
+  entryPoints: ["src/webview/settings.ts"],
+  bundle: true,
+  platform: "browser",
+  format: "iife",
+  target: "es2020",
+  outfile: "dist/webview/settings.js",
+  sourcemap: false,
+  logLevel: "info",
+};
+
 if (watch) {
-  const ctxs = await Promise.all([esbuild.context(extensionBuild), esbuild.context(webviewBuild)]);
+  const ctxs = await Promise.all([esbuild.context(extensionBuild), esbuild.context(webviewBuild), esbuild.context(settingsBuild)]);
   await Promise.all(ctxs.map((ctx) => ctx.watch()));
   console.log("[esbuild] watching...");
 } else {
-  await Promise.all([esbuild.build(extensionBuild), esbuild.build(webviewBuild)]);
+  await Promise.all([esbuild.build(extensionBuild), esbuild.build(webviewBuild), esbuild.build(settingsBuild)]);
   console.log("[esbuild] build done");
 }

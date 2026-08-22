@@ -2,7 +2,7 @@
   "name": "dsh-vscode",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.9.51",
+  "version": "0.10.0",
   "publisher": "foorgange",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -70,6 +70,11 @@
         "command": "dsh.openInBrowser",
         "title": "%cmd.openInBrowser.title%",
         "icon": "$(globe)"
+      },
+      {
+        "command": "dsh.openSettings",
+        "title": "%cmd.openSettings.title%",
+        "icon": "$(gear)"
       },
       {
         "command": "dsh.generateCommitMessage",
@@ -149,6 +154,11 @@
           "command": "dsh.openChatWindow",
           "when": "view == dsh.chatView || view == dsh.chatViewSecondary",
           "group": "navigation@3"
+        },
+        {
+          "command": "dsh.openSettings",
+          "when": "view == dsh.chatView || view == dsh.chatViewSecondary",
+          "group": "navigation@4"
         }
       ],
       "scm/title": [
@@ -250,14 +260,16 @@
     "watch": "node esbuild.mjs --watch",
     "package": "npm run build && node tools/clean-releases.mjs && vsce package -o Releases",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/smoke/store.test.js && node tests/smoke/render.test.js && node tests/smoke/artifact.test.js"
+    "test": "node tests/smoke/store.test.js && node tests/smoke/render.test.js && node tests/smoke/artifact.test.js && node tests/smoke/plugin-registry.test.js"
   },
   "dependencies": {
     "dompurify": "^3.2.4",
+    "js-yaml": "^4.3.1",
     "marked": "^15.0.7",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
     "@types/vscode": "^1.90.0",
     "@types/ws": "^8.5.13",

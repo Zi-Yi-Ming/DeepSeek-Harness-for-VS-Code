@@ -10,6 +10,7 @@
   "cmd.startServer.title": "DSH: Start Server",
   "cmd.stopServer.title": "DSH: Stop Server",
   "cmd.openInBrowser.title": "DSH: Open in Browser",
+  "cmd.openSettings.title": "DSH: Settings",
   "cmd.generateCommitMessage.title": "DSH: Generate Commit Message",
   "cmd.askSelection.title": "DSH: Send Selection to @dsh",
   "cmd.askFile.title": "DSH: Ask @dsh About This File",

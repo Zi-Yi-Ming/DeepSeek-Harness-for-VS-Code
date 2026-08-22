@@ -8,6 +8,7 @@ import { ensureRollbackPluginInstalled } from "./dsh/rollbackInstall";
 import { folderCwd } from "./dsh/participantSessions";
 import { ChatPanelProvider } from "./webview/panel";
 import { ChatWindowProvider } from "./webview/window";
+import { SettingsPanelProvider } from "./webview/settingsPanel";
 
 export function activate(ctx: vscode.ExtensionContext) {
   const t = createTranslator();
@@ -116,6 +117,7 @@ export function activate(ctx: vscode.ExtensionContext) {
   // 否则 VS Code 会按默认 tree 视图处理,去找不存在的树数据提供者并显示占位文案。
   // 聊天主体位于编辑器区标签页(ChatWindowProvider,每会话一个标签);侧边栏为会话列表。
   const chatWindow = new ChatWindowProvider(hub, ctx);
+  const settingsPanel = new SettingsPanelProvider(hub, ctx);
   const registerViewProviders = () => {
     const provider = new ChatPanelProvider(hub, ctx, chatWindow);
     ctx.subscriptions.push(
@@ -268,6 +270,10 @@ export function activate(ctx: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand("dsh.openInBrowser", async () => {
       await vscode.env.openExternal(vscode.Uri.parse(dshUrl()));
+    }),
+    // 设置面板:语言切换 + DSH 插件(MCP/插件)启停 + 技能展示 + 服务器重启
+    vscode.commands.registerCommand("dsh.openSettings", async () => {
+      await settingsPanel.open();
     }),
     vscode.commands.registerCommand("dsh.showOutput", () => {
       output.show(true);

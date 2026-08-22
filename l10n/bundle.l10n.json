@@ -119,5 +119,14 @@
   "rollback.pluginRestarted": "DSH server restarted; the rollback plugin is active now.",
   "rollback.pluginManualRestart": "The DSH server was not started by this extension. Restart it from the terminal that launched it.",
   "msg.rollbackRestartHint": "The turn-level Git rollback plugin was installed, but the running DSH server has not loaded it. Restart the server to activate /rollback, /redo and /checkpoints.",
-  "msg.rollbackRestartAction": "Restart Server"
+  "msg.rollbackRestartAction": "Restart Server",
+  "settings.panelTitle": "DSH Settings",
+  "settings.changed": "Plugin config changed; restart the DSH server to apply.",
+  "settings.restartDone": "DSH server restarted.",
+  "settings.restartFailed": "Failed to restart the DSH server: {error}",
+  "settings.manualRestart": "The DSH server was not started by this extension. Restart it from the terminal that launched it.",
+  "settings.toggleFailed": "Failed to toggle the plugin: {error}",
+  "settings.languageApplied": "Interface language switched.",
+  "settings.serverOffline": "The server is offline; cannot restart it.",
+  "settings.openPatchFailed": "Cannot open the config file: {error}"
 }

@@ -1,0 +1,396 @@
+/* DeepSeek Harness 设置面板样式:与聊天界面同一套设计令牌,纯线条图标、无 emoji */
+:root {
+  --dsh-bg: var(--vscode-sideBar-background, #1e1e1e);
+  --dsh-fg: var(--vscode-foreground, #cccccc);
+  --dsh-border: var(--vscode-panel-border, #3c3c3c);
+  --dsh-input-bg: var(--vscode-input-background, #2a2a2a);
+  --dsh-btn-bg: var(--vscode-button-background, #0e639c);
+  --dsh-btn-fg: var(--vscode-button-foreground, #ffffff);
+  --dsh-accent: var(--vscode-focusBorder, #007fd4);
+  --dsh-muted: var(--vscode-descriptionForeground, #9d9d9d);
+  --dsh-code-bg: var(--vscode-textCodeBlock-background, #1e1e1e);
+  --dsh-danger: var(--vscode-errorForeground, #f14c4c);
+  --dsh-ok: #4ec9b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--dsh-bg);
+  color: var(--dsh-fg);
+  font-family: var(--vscode-font-family, "Segoe UI", sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+}
+
+#app {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.settings-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 18px 22px 40px;
+}
+
+/* ---------- 头部 ---------- */
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--dsh-border);
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-title svg {
+  color: var(--dsh-accent);
+}
+
+.settings-server {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--dsh-muted);
+}
+
+.settings-server .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dsh-danger);
+}
+
+.settings-server.on .dot {
+  background: var(--dsh-ok);
+}
+
+/* ---------- 区块 ---------- */
+.section {
+  border: 1px solid var(--dsh-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--dsh-input-bg);
+  font-weight: 600;
+  border-bottom: 1px solid var(--dsh-border);
+}
+
+.section-head svg {
+  color: var(--dsh-muted);
+}
+
+.section-head .hint {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--dsh-muted);
+}
+
+.section-body {
+  padding: 10px 14px;
+}
+
+.section-note {
+  font-size: 12px;
+  color: var(--dsh-muted);
+  padding: 6px 14px 10px;
+  line-height: 1.6;
+}
+
+/* ---------- 语言选择 ---------- */
+.lang-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--dsh-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.seg button {
+  border: none;
+  background: transparent;
+  color: var(--dsh-fg);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  border-right: 1px solid var(--dsh-border);
+}
+
+.seg button:last-child {
+  border-right: none;
+}
+
+.seg button:hover {
+  background: var(--dsh-input-bg);
+}
+
+.seg button.active {
+  background: var(--dsh-btn-bg);
+  color: var(--dsh-btn-fg);
+}
+
+/* ---------- 插件列表 ---------- */
+.plugin-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--dsh-border);
+}
+
+.plugin-row:last-child {
+  border-bottom: none;
+}
+
+.plugin-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--dsh-input-bg);
+  color: var(--dsh-muted);
+}
+
+.plugin-icon.mcp {
+  color: var(--dsh-accent);
+}
+
+.plugin-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.plugin-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.plugin-id {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--dsh-muted);
+  font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.badge {
+  flex: none;
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--dsh-border);
+  color: var(--dsh-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge.mcp {
+  color: var(--dsh-accent);
+  border-color: var(--dsh-accent);
+}
+
+.badge.off {
+  color: var(--dsh-danger);
+  border-color: var(--dsh-danger);
+}
+
+.plugin-detail {
+  font-size: 12px;
+  color: var(--dsh-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plugin-detail code {
+  background: var(--dsh-code-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* 开关 */
+.switch {
+  flex: none;
+  position: relative;
+  width: 34px;
+  height: 18px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .track {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  background: var(--dsh-input-bg);
+  border: 1px solid var(--dsh-border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.switch .track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--dsh-muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.switch input:checked + .track {
+  background: var(--dsh-btn-bg);
+  border-color: var(--dsh-btn-bg);
+}
+
+.switch input:checked + .track::after {
+  transform: translateX(16px);
+  background: var(--dsh-btn-fg);
+}
+
+.switch input:disabled + .track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- 技能列表 ---------- */
+.skill-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dsh-border);
+}
+
+.skill-row:last-child {
+  border-bottom: none;
+}
+
+.skill-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-desc {
+  font-size: 12px;
+  color: var(--dsh-muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* ---------- 服务器操作 ---------- */
+.server-actions {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--dsh-border);
+  background: var(--dsh-input-bg);
+  color: var(--dsh-fg);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn:hover {
+  border-color: var(--dsh-accent);
+}
+
+.btn.primary {
+  background: var(--dsh-btn-bg);
+  color: var(--dsh-btn-fg);
+  border-color: var(--dsh-btn-bg);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- 消息条 ---------- */
+.notice {
+  display: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  border: 1px solid var(--dsh-border);
+}
+
+.notice.show {
+  display: block;
+}
+
+.notice.error {
+  border-color: var(--dsh-danger);
+  color: var(--dsh-danger);
+}
+
+.notice.info {
+  border-color: var(--dsh-accent);
+  color: var(--dsh-accent);
+}
+
+/* ---------- 空态 ---------- */
+.empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--dsh-muted);
+  font-size: 12px;
+}

@@ -1,4 +1,4 @@
-# DeepSeek Harness for VS Code
+<img width="1882" height="1424" alt="屏幕截图 2026-08-22 155439" src="https://github.com/user-attachments/assets/bbe52537-2f50-4e49-b8d1-aa809e6c0ca3" /><img width="1975" height="1614" alt="屏幕截图 2026-08-22 155451" src="https://github.com/user-attachments/assets/b85124f8-f66d-4ea8-9525-37d901d85a3e" /># DeepSeek Harness for VS Code
 
 <div align="center">
 
@@ -13,6 +13,9 @@
 
 <img width="1024" alt="会话截图 1" src="https://github.com/user-attachments/assets/e9881be7-332c-4591-9590-26e487802e5e" />
 <img width="1024" alt="会话截图 2" src="https://github.com/user-attachments/assets/ab613456-637e-4dd6-b23c-ba4d0f49324a" />
+![Uploading 屏幕截图 2026-08-22 155451.png…]()
+<img width="1791" height="1080" alt="屏幕截图 2026-08-22 155444" src="https://github.com/user-attachments/assets/2340ce83-bb13-4fa5-84bb-1a6836cf5b14" />
+<img width="1882" height="1424" alt="屏幕截图 2026-08-22 155439" src="https://github.com/user-attachments/assets/cdd5f8ef-a449-4397-acb7-2065b6999b61" />
 
 ---
 

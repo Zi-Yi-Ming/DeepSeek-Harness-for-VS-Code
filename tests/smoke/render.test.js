@@ -182,6 +182,20 @@ async function main() {
   const cmd = posted.find((p) => p.kind === "command");
   check("确认回退发 /rollback 命令", !!cmd && cmd.line === "/rollback 1");
 
+  // 语言切换回归:列表模式切语言后列表必须保留(不得 reload / 清空)
+  dispatch("init", { mode: "list", locked: false, lang: "zh-cn", status: { connected: true }, sessions: [{ sessionId: "s1", title: "中文标题会话", running: false, blank: false, cwd: "C:/ws", updatedAt: 1 }], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
+  await wait(50);
+  check("列表模式渲染", !!document.querySelector(".list-view"));
+  check("列表项存在", document.querySelectorAll(".list-item").length === 1);
+  dispatch("lang", { lang: "en" });
+  await wait(30);
+  check("切英文后列表仍在", !!document.querySelector(".list-view"));
+  check("切英文后列表项仍在(用户内容不翻译)", document.querySelectorAll(".list-item").length === 1);
+  check("切英文后标题翻译", document.querySelector(".list-title")?.textContent === "Conversations");
+  dispatch("lang", { lang: "zh-cn" });
+  await wait(30);
+  check("切回中文列表仍在", !!document.querySelector(".list-view") && document.querySelectorAll(".list-item").length === 1);
+
   let fail = 0;
   for (const [name, ok] of checks) {
     console.log((ok ? "OK  " : "FAIL") + " " + name);

@@ -2829,11 +2829,22 @@ function handleMessage(msg: any) {
       break;
     }
     case "lang": {
-      // 语言设置变更:重载 webview 以全量应用新语言(重载后自动重连并恢复状态)
+      // 语言切换:原地刷新界面文案,不重载 webview(WebviewView 重载会断开消息通道,
+      // 导致侧边栏列表消失且无法恢复)。列表内容(文件路径/会话标题)是用户数据,不参与翻译。
       const next = msg.lang ?? "zh-cn";
       if (next !== state.lang) {
         state.lang = next;
-        setTimeout(() => location.reload(), 150);
+        applyStaticTexts();
+        updateStatus(state.status);
+        if (state.mode === "list") {
+          // 列表模式:重建列表外壳(标题/搜索/空态随语言刷新),会话与分组原样保留
+          listRoot = undefined;
+          listStatusEl = undefined;
+          applyLayout();
+        } else {
+          // 聊天模式:静态文案已刷新;消息区由宿主的 init 重推完成全量重渲染
+          renderLoadMoreButton();
+        }
       }
       break;
     }

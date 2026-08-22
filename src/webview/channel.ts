@@ -92,6 +92,8 @@ export class ChatChannel {
     const configSub = vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("dsh.language")) {
         this.post({ kind: "lang", lang: effectiveLanguage() });
+        // 重推完整状态:webview 不重载(重载会断消息通道),由 init 全量重渲染新语言界面
+        void this.pushFullState();
       }
     });
     this.disposables.push(

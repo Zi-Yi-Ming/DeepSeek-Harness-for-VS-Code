@@ -12,6 +12,7 @@ const extensionBuild = {
   outfile: "dist/extension.js",
   external: ["vscode"],
   sourcemap: true,
+  minify: true,
   logLevel: "info",
 };
 
@@ -24,6 +25,7 @@ const webviewBuild = {
   target: "es2020",
   outfile: "dist/webview/ui.js",
   sourcemap: false,
+  minify: true,
   logLevel: "info",
 };
 
@@ -36,6 +38,7 @@ const settingsBuild = {
   target: "es2020",
   outfile: "dist/webview/settings.js",
   sourcemap: false,
+  minify: true,
   logLevel: "info",
 };
 

@@ -2054,6 +2054,30 @@ body {
   }
 }
 
+/* 思考过程折叠块流式进行中:摘要旁脉动圆点(让"正在思考"可见) */
+.block-reasoning-details.streaming > .block-reasoning-summary::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--dsh-accent, currentColor);
+  animation: dsh-thinking-dot 1s ease-in-out infinite;
+}
+
+@keyframes dsh-thinking-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
 /* 按钮:统一的 hover/按下过渡(轻量,不引入布局抖动) */
 .btn,
 .btn-icon-btn,

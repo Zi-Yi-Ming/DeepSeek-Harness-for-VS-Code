@@ -1183,14 +1183,19 @@ function appendToStream(blockType: string, text: string) {
   if (!state.streamBlock.el) return;
   // 流式进行中:显示闪烁光标(assistant/message 到达后移除)
   state.streamBlock.el.classList.add("streaming");
-  // 节流渲染:80ms 合并一次全量解析,滚动保持即时跟随
+  // 思考过程折叠块:摘要旁加脉动指示,让"正在思考"可见
+  const reasonDetails = state.streamBlock.el.closest(".block-reasoning-details");
+  if (reasonDetails) reasonDetails.classList.add("streaming");
+  // 自适应节流:文本越长 markdown 全量解析越贵,间隔随长度增长(80ms → 300ms)
   if (streamRenderTimer === undefined) {
+    const len = state.streamBlock.text.length;
+    const delay = Math.min(80 + len / 120, 300);
     streamRenderTimer = setTimeout(() => {
       streamRenderTimer = undefined;
       if (state.streamBlock?.el && typeof state.streamBlock.text === "string") {
         setHtml(state.streamBlock.el, state.streamBlock.text);
       }
-    }, 80);
+    }, delay);
   }
   scrollToBottom();
 }
@@ -2411,8 +2416,9 @@ function scrollToBottom() {
   });
 }
 
-/** 顶部"加载更早的消息"按钮:仅在服务器确认还有更早历史时显示。 */
+/** 顶部"加载更早的消息"按钮:仅在服务器确认还有更早历史时显示(幂等,避免重复插入)。 */
 function renderLoadMoreButton() {
+  messages.querySelectorAll(".btn-load-more").forEach((b) => b.remove());
   if (!state.hasMore || !state.current) return;
   const loadMore = el("button", "btn btn-load-more", t("加载更早的消息"));
   loadMore.addEventListener("click", () => vscode.postMessage({ kind: "loadMore" }));

@@ -38,19 +38,19 @@ body {
   width: 100%;
 }
 
-/* 消息展示区(DS 输出):宽列 */
+/* 消息展示区(DS 输出):宽列,参考网页端内容宽 748px */
 .messages,
 .goal-area,
 .conversation-bottom {
-  width: min(100% - 32px, 1200px);
+  width: min(100% - 32px, 748px);
   margin-left: auto;
   margin-right: auto;
   align-self: center;
 }
 
-/* 输入区:保持 760px 阅读宽度 */
+/* 输入区:与网页端一致 748px 阅读宽度 */
 .composer {
-  width: min(100% - 16px, 760px);
+  width: min(100% - 16px, 748px);
   margin: 4px auto 8px;
   align-self: center;
 }
@@ -1363,51 +1363,145 @@ body {
   gap: 6px;
 }
 
-.tool-item {
-  display: flex;
+/* ---------- 工具胶囊(思考/模型/预设/权限):按钮 + 弹出菜单(参考网页端) ---------- */
+.tool-pop {
+  position: relative;
+  display: inline-flex;
+}
+
+.tool-pop.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tool-pop-btn {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  /* 固定高度(border-box):原生 select 固有高度不一致会撑高胶囊,
-     导致同一行三个下拉(权限/思考/模型)高低错落;固定后必然同线对齐 */
+  /* 固定高度(border-box):所有胶囊必然等高,同一行严格对齐 */
   height: 30px;
   box-sizing: border-box;
   border: 1px solid var(--dsh-border);
   border-radius: 999px;
   padding: 0 10px;
   background: var(--dsh-bg);
+  color: var(--dsh-fg);
   cursor: pointer;
+  font-size: 12px;
+  max-width: 240px;
 }
 
-.tool-item:hover {
+.tool-pop-btn:hover {
   border-color: var(--dsh-accent);
 }
 
-.tool-item[hidden] {
-  display: none;
+.tool-pop-btn.open {
+  border-color: var(--dsh-accent);
 }
 
 .tool-label {
   font-size: 12px;
   color: var(--dsh-muted);
   white-space: nowrap;
+  flex: none;
 }
 
-.tool-select {
+.tool-pop-value {
+  font-size: 12px;
+  color: var(--dsh-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.tool-pop-value.muted {
+  color: var(--dsh-muted);
+}
+
+.tool-pop-btn .chev {
+  flex: none;
+  color: var(--dsh-muted);
+  transition: transform 0.12s ease;
+}
+
+.tool-pop-btn.open .chev {
+  transform: rotate(180deg);
+}
+
+/* 弹出菜单(向上展开,与 + 菜单一致) */
+.tool-pop-menu {
+  position: absolute;
+  z-index: 120;
+  left: 0;
+  bottom: calc(100% + 6px);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 320px;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  background: var(--vscode-menu-background, #252526);
+  border: 1px solid var(--dsh-border);
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.tool-pop-menu[hidden] {
+  display: none;
+}
+
+.tool-pop-group {
+  font-size: 11px;
+  color: var(--dsh-muted);
+  padding: 6px 10px 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.tool-pop-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  width: 100%;
+  border: none;
   background: transparent;
   color: var(--dsh-fg);
-  border: none;
-  outline: none;
-  font-size: 12px;
-  max-width: 170px;
-  padding: 0;
-  height: auto;
-  line-height: 1.2;
+  text-align: left;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 12px;
 }
 
-.tool-select:disabled {
-  opacity: 0.5;
-  cursor: default;
+.tool-pop-item:hover {
+  background: var(--vscode-menu-selectionBackground, #094771);
+  color: var(--vscode-menu-selectionForeground, #ffffff);
+}
+
+.tool-pop-item.active .tool-pop-item-name {
+  font-weight: 600;
+}
+
+.tool-pop-item-name {
+  font-size: 12px;
+  grid-column: 1;
+}
+
+.tool-pop-item-desc {
+  font-size: 11px;
+  color: var(--dsh-muted);
+  line-height: 1.4;
+  word-break: break-word;
+  grid-column: 1;
+}
+
+.tool-pop-item svg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  flex: none;
 }
 
 .input-wrap {
@@ -1882,8 +1976,12 @@ body {
     border-radius: 12px;
   }
 
-  .tool-select {
-    max-width: 96px;
+  .tool-pop-value {
+    max-width: 88px;
+  }
+
+  .tool-pop-btn {
+    max-width: 160px;
   }
 
   .input {

@@ -131,26 +131,31 @@ async function main() {
   check("assistant/message 后 streaming 类移除", document.querySelectorAll(".streaming").length === 0);
   check("最终文本完整", (document.querySelector(".msg-assistant")?.textContent ?? "").includes("你好世界"));
 
-  // 权限切换:change → permission 消息 → 乐观更新 → 投影校准
+  // 权限切换:点击胶囊 → 弹出菜单选项 → permission 消息 → 乐观更新 → 投影校准
   const PERMS = { options: [{ value: "read-only", name: "read-only" }, { value: "workspace-write", name: "workspace-write" }, { value: "danger-full-access", name: "danger-full-access" }], currentValue: "read-only" };
   dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: PERMS, stats: undefined, todos: [], hasMore: false, queue: [] });
   await wait(80);
-  let permSel = null;
-  for (const s of document.querySelectorAll("select.tool-select")) {
-    if ((s.closest(".tool-item")?.getAttribute("title") ?? "").includes("权限")) { permSel = s; break; }
+  let permPop = null;
+  for (const p of document.querySelectorAll(".tool-pop")) {
+    if ((p.getAttribute("title") ?? "").includes("权限")) { permPop = p; break; }
   }
-  check("权限选择器存在", !!permSel);
-  if (permSel) {
-    check("权限初始显示 read-only", permSel.value === "read-only");
-    permSel.value = "workspace-write";
-    permSel.dispatchEvent(new window.Event("change", { bubbles: true }));
+  check("权限选择器存在", !!permPop);
+  if (permPop) {
+    check("权限初始显示只读", (permPop.querySelector(".tool-pop-value")?.textContent ?? "").includes("只读"));
+    permPop.querySelector(".tool-pop-btn").dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await wait(20);
+    check("权限菜单展开", !permPop.querySelector(".tool-pop-menu").hidden);
+    const items = [...permPop.querySelectorAll(".tool-pop-item")];
+    const target = items.find((i) => i.textContent.includes("工作区可写"));
+    check("菜单含工作区可写项", !!target);
+    target?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await wait(30);
     const permMsg = posted.find((p) => p.kind === "permission");
-    check("权限 change 发出 permission 消息", !!permMsg && permMsg.preset === "workspace-write");
-    check("权限乐观更新显示新值", permSel.value === "workspace-write");
+    check("权限点击发出 permission 消息", !!permMsg && permMsg.preset === "workspace-write");
+    check("权限乐观更新显示新值", (permPop.querySelector(".tool-pop-value")?.textContent ?? "").includes("工作区可写"));
     dispatch("permissions", { sessionId: "s1", value: { ...PERMS, currentValue: "workspace-write" } });
     await wait(50);
-    check("权限投影校准后保持新值", permSel.value === "workspace-write");
+    check("权限投影校准后保持新值", (permPop.querySelector(".tool-pop-value")?.textContent ?? "").includes("工作区可写"));
   }
 
   // 回合检查点分隔线 + 回退确认卡片

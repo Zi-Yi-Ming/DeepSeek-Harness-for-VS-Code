@@ -292,6 +292,8 @@ const ICONS = {
   todoPending: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
   // 回退撤销(弯箭头)
   undo: "M3 7v6h6|M3 13a9 9 0 1 0 3-5.7L3 10",
+  // 对勾(菜单选中标记)
+  check: "M20 6 9 17l-5-5",
   // 失败(叉号)
   xmark: "M18 6 6 18|M6 6l12 12",
 };
@@ -615,23 +617,63 @@ const composer = el("div", "composer");
 // 附件行:左上角 + 添加文件按钮 + 附件芯片(自动附加激活文件 / 手动选择)
 const attachmentsRow = el("div", "attachments-row");
 
-function toolSelect(label: string, title: string): { wrap: HTMLElement; select: HTMLSelectElement; labelEl: HTMLElement } {
-  const wrap = el("label", "tool-item");
+/** 弹出菜单式工具胶囊(参考网页端):固定高度按钮 + 向上弹出的选项菜单。
+ *  原生 <select> 会截断长文本(模型名)且固有高度不一导致同排错位;菜单展示完整内容。 */
+function toolPop(label: string, title: string): { wrap: HTMLElement; labelEl: HTMLElement; btnValue: HTMLElement; menu: HTMLElement } {
+  const wrap = el("div", "tool-pop");
   wrap.title = title;
+  const btn = el("button", "tool-pop-btn");
+  btn.type = "button";
   const labelEl = el("span", "tool-label", label);
-  wrap.append(labelEl);
-  const select = el("select", "tool-select");
-  wrap.append(select);
-  return { wrap, select, labelEl };
+  const btnValue = el("span", "tool-pop-value", "—");
+  const chev = lineIcon(ICONS.chevron, 10);
+  chev.classList.add("chev");
+  btn.append(labelEl, btnValue, chev);
+  const menu = el("div", "tool-pop-menu");
+  menu.hidden = true;
+  wrap.append(btn, menu);
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = menu.hidden;
+    closeToolMenus();
+    menu.hidden = !willOpen;
+    btn.classList.toggle("open", willOpen);
+  });
+  return { wrap, labelEl, btnValue, menu };
+}
+
+/** 关闭所有工具菜单(点空白处时)。 */
+function closeToolMenus() {
+  document.querySelectorAll<HTMLElement>(".tool-pop").forEach((p) => {
+    const menu = p.querySelector<HTMLElement>(".tool-pop-menu");
+    const btn = p.querySelector<HTMLElement>(".tool-pop-btn");
+    if (menu) menu.hidden = true;
+    if (btn) btn.classList.remove("open");
+  });
+}
+document.addEventListener("click", () => closeToolMenus());
+
+/** 工具菜单项:名称 + 可选描述;点击后执行 action 并关闭菜单。 */
+function toolMenuOption(menu: HTMLElement, name: string, detail: string | undefined, active: boolean, action: () => void): HTMLButtonElement {
+  const b = el("button", "tool-pop-item" + (active ? " active" : ""));
+  b.type = "button";
+  const nameSpan = el("span", "tool-pop-item-name", name);
+  b.append(nameSpan);
+  if (detail) b.append(el("span", "tool-pop-item-desc", detail));
+  if (active) b.append(lineIcon(ICONS.check, 12));
+  b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeToolMenus();
+    action();
+  });
+  menu.append(b);
+  return b;
 }
 
 // 思考 / 模型 / 预设:位于输入框右下角
-const thinkingTool = toolSelect(t("思考"), t("思考深度(推理强度)"));
-const thinkingSelect = thinkingTool.select;
-const modelTool = toolSelect(t("模型"), t("模型"));
-const modelSelect = modelTool.select;
-const presetTool = toolSelect(t("预设"), t("Agent 预设"));
-const presetSelect = presetTool.select;
+const thinkingTool = toolPop(t("思考"), t("思考深度(推理强度)"));
+const modelTool = toolPop(t("模型"), t("模型"));
+const presetTool = toolPop(t("预设"), t("Agent 预设"));
 const composerRight = el("div", "composer-right");
 composerRight.append(thinkingTool.wrap, modelTool.wrap);
 
@@ -669,8 +711,7 @@ btnPlus.append(lineIcon(ICONS.slash, 15));
 const btnAddAttach = el("button", "attach-add-btn");
 btnAddAttach.title = t("添加文件或文件夹到对话");
 btnAddAttach.append(lineIcon(ICONS.plus, 12));
-const permissionTool = toolSelect(t("权限"), t("读写权限(沙箱模式 + 审批策略)"));
-const permissionSelect = permissionTool.select;
+const permissionTool = toolPop(t("权限"), t("读写权限(沙箱模式 + 审批策略)"));
 const hint = el("div", "hint", t("Enter 发送 · Shift+Enter 换行"));
 composerBottom.append(btnPlus, btnAddAttach, permissionTool.wrap, composerRight, hint);
 // 对话框顶部行:左上角 ＋ 添加文件 + 芯片;右上角 预设胶囊(仅新会话显示)
@@ -755,28 +796,6 @@ btnBrowser.addEventListener("click", () => vscode.postMessage({ kind: "openBrows
 sessionSelect.addEventListener("change", () => {
   const id = sessionSelect.value;
   if (id) vscode.postMessage({ kind: "select", sessionId: id });
-});
-thinkingSelect.addEventListener("change", () => {
-  const m = state.models?.current;
-  if (!m) return;
-  vscode.postMessage({ kind: "selectModel", provider: m.provider, model: m.model, effort: thinkingSelect.value });
-});
-modelSelect.addEventListener("change", () => {
-  const [provider, model] = modelSelect.value.split("|");
-  if (!provider || !model) return;
-  vscode.postMessage({ kind: "selectModel", provider, model, effort: state.models?.current?.reasoningEffort });
-});
-presetSelect.addEventListener("change", () => {
-  if (presetSelect.value) vscode.postMessage({ kind: "selectPreset", preset: presetSelect.value });
-});
-permissionSelect.addEventListener("change", () => {
-  // 直接应用:通过官方 /permission 命令切换(新回合即按该权限执行),命令消息以系统提示折叠显示,不进入输入框
-  if (!permissionSelect.value) return;
-  const preset = permissionSelect.value;
-  // 乐观更新:立即显示所选值,服务器 projection 到达后再次校准
-  state.permissions = { ...(state.permissions ?? { options: [], currentValue: "" }), currentValue: preset };
-  renderPermissionsSelect();
-  vscode.postMessage({ kind: "permission", preset });
 });
 
 // 底部回退 / 分支操作
@@ -1850,17 +1869,25 @@ function renderThinkingSelect() {
   const m = state.models?.current;
   const modelInfo = m ? findModel(m.provider, m.model) : undefined;
   const efforts = modelInfo?.reasoning?.efforts ?? [];
-  thinkingSelect.innerHTML = "";
-  const def = el("option", undefined, "默认");
-  def.value = "";
-  thinkingSelect.append(def);
+  const menu = thinkingTool.menu;
+  menu.innerHTML = "";
+  // 默认(模型自带)
+  toolMenuOption(menu, "默认", undefined, !m?.reasoningEffort, () => {
+    if (!m) return;
+    vscode.postMessage({ kind: "selectModel", provider: m.provider, model: m.model, effort: "" });
+    renderThinkingSelect();
+  });
   for (const effort of efforts) {
-    const option = el("option", undefined, effort.name || effort.id);
-    option.value = effort.id;
-    if (m?.reasoningEffort === effort.id) option.selected = true;
-    thinkingSelect.append(option);
+    toolMenuOption(menu, effort.name || effort.id, undefined, m?.reasoningEffort === effort.id, () => {
+      if (!m) return;
+      vscode.postMessage({ kind: "selectModel", provider: m.provider, model: m.model, effort: effort.id });
+      renderThinkingSelect();
+    });
   }
-  thinkingSelect.disabled = efforts.length === 0;
+  const current = efforts.find((e) => e.id === m?.reasoningEffort);
+  thinkingTool.btnValue.textContent = clean(current?.name || (m?.reasoningEffort ? m.reasoningEffort : "默认"));
+  thinkingTool.btnValue.classList.toggle("muted", !current && !m?.reasoningEffort);
+  thinkingTool.wrap.classList.toggle("disabled", efforts.length === 0);
 }
 
 function findModel(provider: string, model: string): ModelInfo | undefined {
@@ -1870,28 +1897,31 @@ function findModel(provider: string, model: string): ModelInfo | undefined {
 function renderModelSelect() {
   const m = state.models?.current;
   const groups = state.models?.groups ?? [];
-  const multiGroup = groups.length > 1;
-  modelSelect.innerHTML = "";
+  const menu = modelTool.menu;
+  menu.innerHTML = "";
   let currentInList = false;
+  const multiGroup = groups.length > 1;
   for (const g of groups) {
+    if (multiGroup) {
+      const head = el("div", "tool-pop-group", g.name);
+      menu.append(head);
+    }
     for (const model of g.models) {
-      const option = el("option", undefined, multiGroup ? `${g.name} / ${model.name}` : model.name);
-      option.value = `${g.id}|${model.id}`;
-      if (m && m.provider === g.id && m.model === model.id) {
-        option.selected = true;
-        currentInList = true;
-      }
-      modelSelect.append(option);
+      const active = m && m.provider === g.id && m.model === model.id;
+      if (active) currentInList = true;
+      toolMenuOption(menu, model.name, multiGroup ? g.name : model.id, !!active, () => {
+        vscode.postMessage({ kind: "selectModel", provider: g.id, model: model.id, effort: state.models?.current?.reasoningEffort });
+        renderModelSelect();
+      });
     }
   }
   // 当前模型不在目录(例如临时模型)时,补一个只读占位项
   if (m && !currentInList) {
-    const option = el("option", undefined, modelName(m.provider, m.model));
-    option.value = `${m.provider}|${m.model}`;
-    option.selected = true;
-    modelSelect.prepend(option);
+    toolMenuOption(menu, modelName(m.provider, m.model), m.provider, true, () => undefined);
   }
-  modelSelect.disabled = groups.length === 0;
+  modelTool.btnValue.textContent = clean(m ? modelName(m.provider, m.model) : "—");
+  modelTool.btnValue.classList.toggle("muted", !m);
+  modelTool.wrap.classList.toggle("disabled", groups.length === 0);
 }
 
 function groupName(id: string): string {
@@ -1909,25 +1939,24 @@ function renderPresetSelect() {
   const switchable = (current?.blank ?? true);
   presetTool.wrap.hidden = !switchable;
   if (!switchable) return;
-  presetSelect.innerHTML = "";
+  const menu = presetTool.menu;
+  menu.innerHTML = "";
   let currentInList = false;
   for (const preset of presets) {
-    const option = el("option", undefined, presetLabel(preset.id) + (preset.isDefault ? " · 默认" : ""));
-    option.value = preset.id;
-    if (current?.agentPreset === preset.id) {
-      option.selected = true;
-      currentInList = true;
-    }
-    presetSelect.append(option);
+    const active = current?.agentPreset === preset.id;
+    if (active) currentInList = true;
+    toolMenuOption(menu, presetLabel(preset.id), preset.isDefault ? "默认" : undefined, active, () => {
+      vscode.postMessage({ kind: "selectPreset", preset: preset.id });
+      renderPresetSelect();
+    });
   }
   // 当前预设不在列表(自定义/已移除)时,补一个只读占位项
   if (current?.agentPreset && !currentInList) {
-    const option = el("option", undefined, presetLabel(current.agentPreset));
-    option.value = current.agentPreset;
-    option.selected = true;
-    presetSelect.prepend(option);
+    toolMenuOption(menu, presetLabel(current.agentPreset), undefined, true, () => undefined);
   }
-  presetSelect.disabled = presets.length === 0;
+  presetTool.btnValue.textContent = clean(current?.agentPreset ? presetLabel(current.agentPreset) : "默认");
+  presetTool.btnValue.classList.toggle("muted", !current?.agentPreset);
+  presetTool.wrap.classList.toggle("disabled", presets.length === 0);
 }
 
 function presetLabel(id: string): string {
@@ -1936,26 +1965,28 @@ function presetLabel(id: string): string {
 
 function renderPermissionsSelect() {
   const options = state.permissions?.options ?? [];
-  permissionSelect.innerHTML = "";
   const current = state.permissions?.currentValue;
+  const menu = permissionTool.menu;
+  menu.innerHTML = "";
   let currentInList = false;
   for (const option of options) {
-    const item = el("option", undefined, permissionLabel(option.value, option.name));
-    item.value = option.value;
-    if (current === option.value) {
-      item.selected = true;
-      currentInList = true;
-    }
-    permissionSelect.append(item);
+    const active = current === option.value;
+    if (active) currentInList = true;
+    toolMenuOption(menu, permissionLabel(option.value, option.name), option.description, active, () => {
+      // 直接应用:通过官方 /permission 命令切换(新回合即按该权限执行),命令消息以系统提示折叠显示,不进入输入框
+      // 乐观更新:立即显示所选值,服务器 projection 到达后再次校准
+      state.permissions = { ...(state.permissions ?? { options: [], currentValue: "" }), currentValue: option.value };
+      renderPermissionsSelect();
+      vscode.postMessage({ kind: "permission", preset: option.value });
+    });
   }
   // 当前权限不在预设列表(自定义组合)时,补一个只读占位项
   if (current && !currentInList) {
-    const item = el("option", undefined, permissionLabel(current));
-    item.value = current;
-    item.selected = true;
-    permissionSelect.prepend(item);
+    toolMenuOption(menu, permissionLabel(current), undefined, true, () => undefined);
   }
-  permissionSelect.disabled = options.length === 0;
+  permissionTool.btnValue.textContent = clean(current ? permissionLabel(current) : "—");
+  permissionTool.btnValue.classList.toggle("muted", !current);
+  permissionTool.wrap.classList.toggle("disabled", options.length === 0);
 }
 
 function renderContextBar() {

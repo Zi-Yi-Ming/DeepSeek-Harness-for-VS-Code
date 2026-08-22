@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "version": "0.9.51",
-  "publisher": "Jager",
+  "publisher": "foorgange",
   "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
@@ -245,6 +245,7 @@
     }
   },
   "scripts": {
+    "vscode:prepublish": "npm run build",
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "package": "npm run build && node tools/clean-releases.mjs && vsce package -o Releases",

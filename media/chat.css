@@ -78,6 +78,36 @@ body {
   color: var(--dsh-fg);
 }
 
+/* 列表头连接状态(原生 view/title 接管操作按钮后,状态移到标题行右侧) */
+.list-status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--dsh-muted);
+}
+
+.list-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dsh-muted);
+}
+
+.list-status.ok::before {
+  background: #4ec9b0;
+}
+
+.list-status.starting::before {
+  background: #d7ba7d;
+}
+
+.list-status.err::before {
+  background: #f14c4c;
+}
+
 .btn-list-new {
   display: inline-flex;
   align-items: center;

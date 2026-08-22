@@ -2342,22 +2342,22 @@ function updateSendButton() {
 
 function updateStatus(status: HubStatus) {
   state.status = status;
-  if (status.serverUp && status.muxConnected) {
-    statusDot.className = "status-dot ok";
-    statusText.textContent = clean(status.model ? t("已连接 · {model}", { model: status.model }) : t("已连接"));
-  } else if (status.serverStarting) {
-    statusDot.className = "status-dot starting";
-    statusText.textContent = clean(t("启动中…"));
-  } else if (status.serverUp) {
-    statusDot.className = "status-dot starting";
-    statusText.textContent = clean(t("连接中…"));
-  } else {
-    statusDot.className = "status-dot err";
-    statusText.textContent = clean(t("未连接 · 点击重试"));
-    statusDot.onclick = () => vscode.postMessage({ kind: "startServer" });
-    return;
+  const ok = status.serverUp && status.muxConnected;
+  const statusCls = ok ? "ok" : status.serverStarting || status.serverUp ? "starting" : "err";
+  const statusLabel = ok
+    ? status.model ? t("已连接 · {model}", { model: status.model }) : t("已连接")
+    : status.serverStarting
+      ? t("启动中…")
+      : status.serverUp
+        ? t("连接中…")
+        : t("未连接 · 点击重试");
+  statusDot.className = "status-dot " + statusCls;
+  statusText.textContent = clean(statusLabel);
+  if (listStatusEl) {
+    listStatusEl.textContent = clean(ok ? t("已连接") : status.serverStarting ? t("启动中…") : t("未连接"));
+    listStatusEl.className = "list-status " + statusCls;
   }
-  statusDot.onclick = null;
+  statusDot.onclick = ok || status.serverStarting || status.serverUp ? null : () => vscode.postMessage({ kind: "startServer" });
 }
 
 /** 滚动节流:rAF 合并,流式高频 chunk 不重复触发布局抖动。 */
@@ -2873,14 +2873,19 @@ window.addEventListener("message", (event) => {
 // ---------- 布局模式(侧边栏会话列表 / 编辑器标签页聊天) ----------
 
 let listRoot: HTMLDivElement | undefined;
+/** 列表头的连接状态指示(列表模式下模块 header 隐藏,状态移到这里)。 */
+let listStatusEl: HTMLSpanElement | undefined;
 
 /** 按 state.mode 切换整体布局:列表模式渲染会话列表,聊天模式渲染完整聊天 UI。 */
 function applyLayout() {
   if (state.mode === "list") {
     if (!listRoot) listRoot = buildListApp();
     app.replaceChildren(listRoot);
+    // 原生 view/title 已提供 ＋ 新对话 / 地球 / 布局 / 齿轮按钮,隐藏模块 header 避免图标重复
+    header.style.display = "none";
   } else {
     app.replaceChildren(root);
+    header.style.display = "";
     // 编辑器标签页模式:标签即会话,隐藏会话切换下拉与新建按钮
     sessionSelectWrap.style.display = state.locked ? "none" : "";
     btnNew.style.display = state.locked ? "none" : "";
@@ -2891,10 +2896,11 @@ function buildListApp(): HTMLDivElement {
   const wrap = el("div", "list-view");
   const head = el("div", "list-header");
   head.append(el("span", "list-title", t("对话列表")));
-  const btnNewChat = el("button", "btn btn-list-new");
-  btnNewChat.append(lineIcon(ICONS.plus, 14), el("span", undefined, t("新建对话")));
-  btnNewChat.addEventListener("click", () => vscode.postMessage({ kind: "newTab" }));
-  head.append(btnNewChat);
+  // 列表模式:原生 view/title 已有 ＋新对话 / 地球 / 布局 / 齿轮按钮,
+  // 此处不加重复按钮,只保留标题 + 状态指示 + 搜索框
+  const listStatus = el("span", "list-status", t("未连接"));
+  listStatusEl = listStatus;
+  head.append(listStatus);
   const search = el("input", "list-search");
   search.placeholder = t("搜索会话");
   search.value = state.search;

@@ -134,11 +134,17 @@ export class SettingsPanelProvider {
     if (!this.panel) return;
     const snapshot = readRegistry();
     let skills: { name: string; description: string; whenToUse?: string; modelInvocable: boolean }[] | null = null;
-    const sid = this.hub.store.currentSessionId;
-    if (sid && this.hub.status.serverUp) {
+    const serverUp = this.hub.status.serverUp;
+    if (serverUp) {
+      // 技能按会话读取:先刷新会话列表,再取当前/最近会话兜底
       try {
-        const value = await this.hub.getSkills(sid);
-        skills = value?.skills ?? [];
+        await this.hub.refreshSessions();
+        let sid = this.hub.store.currentSessionId;
+        if (!sid) sid = this.hub.store.listSessions()[0]?.sessionId;
+        if (sid) {
+          const value = await this.hub.getSkills(sid);
+          skills = value?.skills ?? [];
+        }
       } catch {
         skills = null;
       }
@@ -147,7 +153,7 @@ export class SettingsPanelProvider {
       kind: "state",
       lang: effectiveLanguage(),
       language: vscode.workspace.getConfiguration("dsh").get<string>("language", "auto"),
-      serverUp: this.hub.status.serverUp,
+      serverUp,
       version: this.hub.status.version,
       parseError: snapshot.parseError,
       plugins: snapshot.plugins,

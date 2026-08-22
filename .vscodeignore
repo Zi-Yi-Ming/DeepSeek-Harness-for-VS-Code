@@ -10,4 +10,3 @@ tsconfig.json
 .gitignore
 tools/**
 dist/test.js
-media/icon.svg

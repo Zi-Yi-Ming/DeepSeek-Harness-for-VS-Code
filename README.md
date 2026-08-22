@@ -1,4 +1,4 @@
-# DeepSeek Harness for VS Code
+# DeepSeek Harness for VS-Code
 
 <div align="center">
 

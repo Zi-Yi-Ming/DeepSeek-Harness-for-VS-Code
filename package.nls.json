@@ -1,5 +1,5 @@
 {
-  "displayName": "DeepSeek Harness for VS Code",
+  "displayName": "DeepSeek Harness for VS-Code",
   "description": "Use DeepSeek Harness directly in VS Code: sidebar conversation list with editor-tab chat, @dsh built-in chat participant, settings panel (language / plugins / models / agent presets, two-way synced with the web UI), turn-level Git rollback, and live two-way sync with the web.",
   "cmd.openChat.title": "DSH: Open Chat (Editor Tab)",
   "cmd.openChatWindow.title": "DSH: Open Chat as Editor Tab",

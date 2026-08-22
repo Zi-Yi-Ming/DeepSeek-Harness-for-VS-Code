@@ -396,7 +396,10 @@ const EN_TEXT: Record<string, string> = {
   "切换权限(直接应用)": "Switch permission (apply directly)",
   "技能(插入提示词)": "Skills (insert prompt)",
   ".claude 配置": ".claude configuration",
+  ".codex 配置": ".codex configuration",
+  "GitHub Copilot 配置": "GitHub Copilot configuration",
   "CLAUDE.md · DSH 已自动读取": "CLAUDE.md · auto-loaded by DSH",
+  ".codex/config.toml 已存在": ".codex/config.toml already exists",
   "插入 .claude 命令模板": "Insert .claude command template",
   "插入 .claude 技能说明(SKILL.md)": "Insert .claude skill description (SKILL.md)",
   "本轮调用 {n} 个工具": "Called {n} tools this turn",
@@ -827,8 +830,9 @@ function renderPlusMenu() {
   };
   const item = (icon: string, label: string, action: () => void, hintText?: string) => {
     const b = el("button", "plus-menu-item");
-    const iconSvg = ICONS[icon as keyof typeof ICONS];
-    if (iconSvg) b.append(lineIcon(iconSvg, 14));
+    // 菜单项不绘制小图标:14px 线条图形辨识度差(stop 方形易被误认成乱码方块);
+    // 仅"当前权限"保留对勾作为选中指示
+    if (icon === "check") b.append(lineIcon(ICONS.check, 12));
     b.append(el("span", "menu-item-label", label));
     if (hintText) b.title = hintText;
     b.addEventListener("click", action);
@@ -865,7 +869,7 @@ function renderPlusMenu() {
   // 技能列表(来自 DSH skill.list,模型可调用)
   const skills = state.skills ?? [];
   if (skills.length > 0) {
-    const group = el("div", "plus-menu-label", "技能(插入提示词)");
+    const group = el("div", "plus-menu-label", t("技能(插入提示词)"));
     plusMenu.append(group);
     for (const skill of skills.slice(0, 12)) {
       item("grid", skill.name, () => insert(`请使用技能「${skill.name}」处理:`), skill.description || skill.whenToUse || "");
@@ -878,10 +882,10 @@ function renderPlusMenu() {
   const hasCopilot =
     claude && (claude.copilotInstructions !== null || claude.copilotInstructionFiles.length > 0 || claude.copilotAgents.length > 0 || claude.copilotPrompts.length > 0);
   if (hasClaude) {
-    const group = el("div", "plus-menu-label", ".claude 配置");
+    const group = el("div", "plus-menu-label", t(".claude 配置"));
     plusMenu.append(group);
     if (claude!.claudeMd) {
-      const info = el("button", "plus-menu-item", "CLAUDE.md · DSH 已自动读取");
+      const info = el("button", "plus-menu-item", t("CLAUDE.md · DSH 已自动读取"));
       info.title = "工作区根目录的 CLAUDE.md / AGENTS.md 已由 DeepSeek Harness 核心自动加载到上下文,无需手动处理";
       info.style.cursor = "default";
       plusMenu.append(info);
@@ -894,10 +898,10 @@ function renderPlusMenu() {
     }
   }
   if (hasCodex) {
-    const group = el("div", "plus-menu-label", ".codex 配置");
+    const group = el("div", "plus-menu-label", t(".codex 配置"));
     plusMenu.append(group);
     if (claude!.codexConfig) {
-      const info = el("button", "plus-menu-item", ".codex/config.toml 已存在");
+      const info = el("button", "plus-menu-item", t(".codex/config.toml 已存在"));
       info.title = ".codex/config.toml 由 Codex CLI 使用;DSH 不读取该配置,可通过 AGENTS.md(已自动加载)承载共享指令";
       info.style.cursor = "default";
       plusMenu.append(info);
@@ -907,7 +911,7 @@ function renderPlusMenu() {
     }
   }
   if (hasCopilot) {
-    const group = el("div", "plus-menu-label", "GitHub Copilot 配置");
+    const group = el("div", "plus-menu-label", t("GitHub Copilot 配置"));
     plusMenu.append(group);
     if (claude!.copilotInstructions !== null) {
       item("file", "copilot-instructions.md", () => insert(claude!.copilotInstructions!), t("插入 Copilot 工作区指令"));

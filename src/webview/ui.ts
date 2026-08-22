@@ -618,17 +618,17 @@ const composer = el("div", "composer");
 const attachmentsRow = el("div", "attachments-row");
 
 /** 弹出菜单式工具胶囊(参考网页端):固定高度按钮 + 向上弹出的选项菜单。
+ *  只显示当前值(不显示"预设/权限/思考/模型"关键字,与网页一致),
  *  原生 <select> 会截断长文本(模型名)且固有高度不一导致同排错位;菜单展示完整内容。 */
-function toolPop(label: string, title: string): { wrap: HTMLElement; labelEl: HTMLElement; btnValue: HTMLElement; menu: HTMLElement } {
+function toolPop(title: string): { wrap: HTMLElement; btnValue: HTMLElement; menu: HTMLElement } {
   const wrap = el("div", "tool-pop");
   wrap.title = title;
   const btn = el("button", "tool-pop-btn");
   btn.type = "button";
-  const labelEl = el("span", "tool-label", label);
   const btnValue = el("span", "tool-pop-value", "—");
   const chev = lineIcon(ICONS.chevron, 10);
   chev.classList.add("chev");
-  btn.append(labelEl, btnValue, chev);
+  btn.append(btnValue, chev);
   const menu = el("div", "tool-pop-menu");
   menu.hidden = true;
   wrap.append(btn, menu);
@@ -639,7 +639,7 @@ function toolPop(label: string, title: string): { wrap: HTMLElement; labelEl: HT
     menu.hidden = !willOpen;
     btn.classList.toggle("open", willOpen);
   });
-  return { wrap, labelEl, btnValue, menu };
+  return { wrap, btnValue, menu };
 }
 
 /** 关闭所有工具菜单(点空白处时)。 */
@@ -670,10 +670,10 @@ function toolMenuOption(menu: HTMLElement, name: string, detail: string | undefi
   return b;
 }
 
-// 思考 / 模型 / 预设:位于输入框右下角
-const thinkingTool = toolPop(t("思考"), t("思考深度(推理强度)"));
-const modelTool = toolPop(t("模型"), t("模型"));
-const presetTool = toolPop(t("预设"), t("Agent 预设"));
+// 思考 / 模型 / 预设:位于输入框右下角(只显示当前值,关键字见 tooltip)
+const thinkingTool = toolPop(t("思考深度(推理强度)"));
+const modelTool = toolPop(t("模型"));
+const presetTool = toolPop(t("Agent 预设"));
 const composerRight = el("div", "composer-right");
 composerRight.append(thinkingTool.wrap, modelTool.wrap);
 
@@ -711,7 +711,7 @@ btnPlus.append(lineIcon(ICONS.slash, 15));
 const btnAddAttach = el("button", "attach-add-btn");
 btnAddAttach.title = t("添加文件或文件夹到对话");
 btnAddAttach.append(lineIcon(ICONS.plus, 12));
-const permissionTool = toolPop(t("权限"), t("读写权限(沙箱模式 + 审批策略)"));
+const permissionTool = toolPop(t("读写权限(沙箱模式 + 审批策略)"));
 const hint = el("div", "hint", t("Enter 发送 · Shift+Enter 换行"));
 composerBottom.append(btnPlus, btnAddAttach, permissionTool.wrap, composerRight, hint);
 // 对话框顶部行:左上角 ＋ 添加文件 + 芯片;右上角 预设胶囊(仅新会话显示)
@@ -723,13 +723,9 @@ composer.append(composerTop, inputWrap, composerBottom);
 function applyStaticTexts() {
   btnNew.title = t("新建会话");
   btnMore.title = t("会话操作:分叉 / 重命名 / 归档");
-  thinkingTool.labelEl.textContent = t("思考");
   thinkingTool.wrap.title = t("思考深度(推理强度)");
-  modelTool.labelEl.textContent = t("模型");
   modelTool.wrap.title = t("模型");
-  presetTool.labelEl.textContent = t("预设");
   presetTool.wrap.title = t("Agent 预设");
-  permissionTool.labelEl.textContent = t("权限");
   permissionTool.wrap.title = t("读写权限(沙箱模式 + 审批策略)");
   input.placeholder = t("向 DeepSeek Harness 发送消息…");
   btnBackToMain.title = t("回到主线(父会话)");

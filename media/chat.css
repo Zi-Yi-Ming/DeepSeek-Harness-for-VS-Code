@@ -38,19 +38,19 @@ body {
   width: 100%;
 }
 
-/* 消息展示区(DS 输出):宽列,参考网页端内容宽 748px */
+/* 消息展示区(DS 输出):宽列 */
 .messages,
 .goal-area,
 .conversation-bottom {
-  width: min(100% - 32px, 748px);
+  width: min(100% - 32px, 1200px);
   margin-left: auto;
   margin-right: auto;
   align-self: center;
 }
 
-/* 输入区:与网页端一致 748px 阅读宽度 */
+/* 输入区:760px 阅读宽度 */
 .composer {
-  width: min(100% - 16px, 748px);
+  width: min(100% - 16px, 760px);
   margin: 4px auto 8px;
   align-self: center;
 }
@@ -1399,13 +1399,6 @@ body {
   border-color: var(--dsh-accent);
 }
 
-.tool-label {
-  font-size: 12px;
-  color: var(--dsh-muted);
-  white-space: nowrap;
-  flex: none;
-}
-
 .tool-pop-value {
   font-size: 12px;
   color: var(--dsh-fg);
@@ -1519,11 +1512,12 @@ body {
   resize: none;
   font-family: inherit;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.4;
   outline: none;
-  min-height: 44px;
+  /* 紧凑高度:单行输入与发送按钮(30px)齐平,多行再自动增高 */
+  min-height: 34px;
   max-height: 180px;
-  padding: 2px 0;
+  padding: 1px 0;
 }
 
 .input::placeholder {

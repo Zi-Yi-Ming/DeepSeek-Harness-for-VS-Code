@@ -459,6 +459,8 @@ const EN_TEXT: Record<string, string> = {
   "{active} 进行中": "{active} in progress",
   "{pending} 待处理": "{pending} pending",
   "插件(Cordis)": "Plugins (Cordis)",
+  "会话已开始,预设固定": "Session started; preset is fixed",
+  "未知预设": "Unknown preset",
   "列出插件状态": "List plugin status",
   "运行插件 <id>": "Run plugin <id>",
   "更新插件 <id>": "Update plugin <id>",
@@ -1931,12 +1933,22 @@ function modelName(provider: string, id: string): string {
 function renderPresetSelect() {
   const current = state.sessions.find((s) => s.sessionId === state.current);
   const presets = state.presets ?? [];
-  // 服务器限制:已开始的会话预设不可更改(agent preset is fixed),切换器只对新会话显示
+  // 服务器限制:已开始的会话预设不可更改(agent preset is fixed),但必须标注当前所用模式
   const switchable = (current?.blank ?? true);
-  presetTool.wrap.hidden = !switchable;
-  if (!switchable) return;
   const menu = presetTool.menu;
   menu.innerHTML = "";
+  if (!switchable) {
+    // 只读:菜单只展示当前预设(会话已开始,无法切换)
+    if (current?.agentPreset) {
+      toolMenuOption(menu, presetLabel(current.agentPreset), t("会话已开始,预设固定"), true, () => undefined);
+    } else {
+      toolMenuOption(menu, t("未知预设"), undefined, true, () => undefined);
+    }
+    presetTool.btnValue.textContent = clean(current?.agentPreset ? presetLabel(current.agentPreset) : "—");
+    presetTool.btnValue.classList.toggle("muted", !current?.agentPreset);
+    presetTool.wrap.classList.toggle("disabled", false);
+    return;
+  }
   let currentInList = false;
   for (const preset of presets) {
     const active = current?.agentPreset === preset.id;

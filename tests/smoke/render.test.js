@@ -158,6 +158,26 @@ async function main() {
     check("权限投影校准后保持新值", (permPop.querySelector(".tool-pop-value")?.textContent ?? "").includes("工作区可写"));
   }
 
+  // 预设:已开始会话(blank=false)预设固定——胶囊标注当前模式,菜单只读展示当前一项
+  dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [{ sessionId: "s1", title: "旧会话", running: false, blank: false, agentPreset: "router-standard", cwd: "/x", updatedAt: 1 }], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
+  dispatch("presets", { value: { presets: [
+    { id: "standard", isDefault: false, name: "标准模式" },
+    { id: "router-standard", isDefault: true, name: "Router Standard (experimental)" },
+  ], authorable: true, hasDocument: false } });
+  await wait(50);
+  let presetPop = null;
+  for (const p of document.querySelectorAll(".tool-pop")) {
+    if ((p.getAttribute("title") ?? "").includes("预设")) { presetPop = p; break; }
+  }
+  check("旧会话预设胶囊显示当前模式", !!presetPop && (presetPop.querySelector(".tool-pop-value")?.textContent ?? "").includes("Router Standard"));
+  if (presetPop) {
+    presetPop.querySelector(".tool-pop-btn").dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await wait(20);
+    const items = [...presetPop.querySelectorAll(".tool-pop-item")];
+    check("旧会话预设菜单只含当前模式", items.length === 1 && items[0].textContent.includes("Router Standard"));
+    check("旧会话预设菜单标注固定", items[0].textContent.includes("固定") || items[0].textContent.includes("fixed"));
+  }
+
   // 回合检查点分隔线 + 回退确认卡片
   dispatch("init", { mode: "chat", locked: true, lang: "zh-cn", status: { connected: true }, sessions: [], current: "s1", events: [], approvals: [], questions: [], running: false, goal: undefined, context: undefined, permissions: undefined, stats: undefined, todos: [], hasMore: false, queue: [] });
   await wait(50);

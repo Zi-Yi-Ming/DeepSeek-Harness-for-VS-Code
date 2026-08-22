@@ -530,13 +530,10 @@ btnNew.append(lineIcon(ICONS.plus));
 const btnMore = el("button", "btn btn-icon");
 btnMore.title = t("会话操作:分叉 / 重命名 / 归档");
 btnMore.append(lineIcon(ICONS.more));
-const btnBrowser = el("button", "btn btn-icon");
-btnBrowser.title = t("在浏览器中打开");
-btnBrowser.append(lineIcon(ICONS.globe));
 const statusDot = el("span", "status-dot");
 const statusText = el("span", "status-text", "未连接");
 sessionSelectWrap.append(sessionSelect);
-header.append(sessionSelectWrap, btnMore, btnNew, btnBrowser, statusDot, statusText);
+header.append(sessionSelectWrap, btnMore, btnNew, statusDot, statusText);
 
 // 会话操作菜单
 const sessionMenu = el("div", "session-menu");
@@ -793,7 +790,6 @@ document.addEventListener("click", (e) => {
   if (!attachMenu.hidden && e.target !== btnAddAttach && !attachMenu.contains(e.target as Node)) attachMenu.hidden = true;
 });
 btnNew.addEventListener("click", () => vscode.postMessage({ kind: "new" }));
-btnBrowser.addEventListener("click", () => vscode.postMessage({ kind: "openBrowser" }));
 sessionSelect.addEventListener("change", () => {
   const id = sessionSelect.value;
   if (id) vscode.postMessage({ kind: "select", sessionId: id });

@@ -418,6 +418,19 @@ body {
   font-size: 13px;
 }
 
+/* 头部操作按钮:中性幽灵样式(不占主色蓝底),与周围元素一致 */
+.header .btn-icon {
+  background: transparent;
+  color: var(--dsh-muted);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.header .btn-icon:hover {
+  background: var(--dsh-input-bg);
+  color: var(--dsh-fg);
+}
+
 .status-dot {
   width: 8px;
   height: 8px;

@@ -119,8 +119,12 @@ function syncManifestDependency(profileDir: string, bundledDir: string): boolean
   if (!existsSync(manifestFile)) return false;
   try {
     const manifest = readJson(manifestFile) as { dependencies?: Record<string, string> };
+    const existing = manifest.dependencies?.[PLUGIN_NAME];
+    // 只处理本扩展自己写入的 file: 依赖:缺失则补上,路径过期(指向已删除的旧版本扩展目录)则迁移。
+    // 用户手动 pin 成 registry/git 版本等非 file: spec 时保持尊重,不覆盖。
+    if (existing !== undefined && !existing.startsWith("file:")) return false;
     const dependency = `file:${bundledDir.replace(/\\/g, "/")}`;
-    if (manifest.dependencies?.[PLUGIN_NAME] === dependency) return false;
+    if (existing === dependency) return false;
     manifest.dependencies = {
       ...(manifest.dependencies ?? {}),
       [PLUGIN_NAME]: dependency,
